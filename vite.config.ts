@@ -1,20 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import mkcert from 'vite-plugin-mkcert'
+import fs from 'fs';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
-  build: { 
-    sourcemap: false  
-  },
+  plugins: [react(), mkcert()],
   server: {
-    port: 3000,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
-    }
-  }
+    },
+    host: '0.0.0.0',
+    port: 3000,
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'cert.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'cert.crt')),
+    },
+  },
 })

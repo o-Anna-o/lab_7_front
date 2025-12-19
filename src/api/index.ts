@@ -17,7 +17,7 @@ const securityWorker = async () => {
 };
 
 export const api = new Api({
-  baseURL: 'http://localhost:8080',
+  baseURL: '',
   withCredentials: true,
   securityWorker,
 });
