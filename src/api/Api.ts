@@ -16,6 +16,7 @@ export interface DsRequestShip {
   containers20ftCount?: number;
   containers40ftCount?: number;
   creationDate?: string;
+  formationDate?: string;
   loadingTime?: number;
   requestShipID?: number;
   ships?: DsShipInRequest[];
@@ -242,57 +243,6 @@ export class Api<
 > extends HttpClient<SecurityDataType> {
   api = {
     /**
-     * @description Update fields of an existing request
-     *
-     * @tags request_ships
-     * @name RequestShipsUpdate
-     * @summary Изменение полей заявки
-     * @request PUT:/api/request-ships/{id}
-     */
-    requestShipsUpdate: (
-      id: number,
-      request: {
-        comment?: string;
-        containers_20ft_count?: number;
-        containers_40ft_count?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<object, object>({
-        path: `/api/request-ships/${id}`,
-        method: "PUT",
-        body: request,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Allow port_operator to complete or reject a formed request
-     *
-     * @tags request_ships
-     * @name RequestShipsCompletionCreate
-     * @summary Завершить или отклонить заявку (модератор)
-     * @request POST:/api/request-ships/{id}/completion
-     */
-    requestShipsCompletionCreate: (
-      id: number,
-      data: {
-        /** Action (complete or reject) */
-        action: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<object, object>({
-        path: `/api/request-ships/${id}/completion`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
      * @description Retrieve a list of requests with optional filters
      *
      * @tags request_ships
@@ -320,6 +270,22 @@ export class Api<
       }),
 
     /**
+     * @description Retrieve the count of ships in the user's draft request
+     *
+     * @tags request_ships
+     * @name RequestShipBasketList
+     * @summary Получить корзину запросов
+     * @request GET:/api/request_ship/basket
+     */
+    requestShipBasketList: (params: RequestParams = {}) =>
+      this.request<object, object>({
+        path: `/api/request_ship/basket`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Retrieve details of a specific request with its ships
      *
      * @tags request_ships
@@ -336,6 +302,32 @@ export class Api<
       }),
 
     /**
+     * @description Update fields of an existing request
+     *
+     * @tags request_ships
+     * @name RequestShipUpdate
+     * @summary Изменение полей заявки
+     * @request PUT:/api/request_ship/{id}
+     */
+    requestShipUpdate: (
+      id: number,
+      request: {
+        comment?: string;
+        containers_20ft_count?: number;
+        containers_40ft_count?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<object, object>({
+        path: `/api/request_ship/${id}`,
+        method: "PUT",
+        body: request,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Remove an entire request from the system
      *
      * @tags request_ships
@@ -347,6 +339,31 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}`,
         method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Allow port_operator to complete or reject a formed request
+     *
+     * @tags request_ships
+     * @name RequestShipCompletionCreate
+     * @summary Завершить или отклонить заявку (модератор)
+     * @request POST:/api/request_ship/{id}/completion
+     */
+    requestShipCompletionCreate: (
+      id: number,
+      data: {
+        /** Action (complete or reject) */
+        action: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<object, object>({
+        path: `/api/request_ship/${id}/completion`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),
@@ -413,27 +430,11 @@ export class Api<
       }),
 
     /**
-     * @description Retrieve the count of ships in the user's draft request
-     *
-     * @tags request_ships
-     * @name RequestsBasketList
-     * @summary Получить корзину запросов
-     * @request GET:/api/requests/basket
-     */
-    requestsBasketList: (params: RequestParams = {}) =>
-      this.request<object, object>({
-        path: `/api/requests/basket`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
      * @description Retrieve a list of ships with optional filters
      *
      * @tags ships
      * @name ShipsList
-     * @summary Get list of ships
+     * @summary Получить список кораблей
      * @request GET:/api/ships
      */
     shipsList: (
@@ -460,7 +461,7 @@ export class Api<
      *
      * @tags ships
      * @name ShipsCreate
-     * @summary Create a new ship
+     * @summary Создать корабль
      * @request POST:/api/ships
      */
     shipsCreate: (ship: DsShip, params: RequestParams = {}) =>
@@ -478,7 +479,7 @@ export class Api<
      *
      * @tags ships
      * @name ShipsDetail
-     * @summary Get a single ship
+     * @summary Один корабль
      * @request GET:/api/ships/{id}
      */
     shipsDetail: (id: number, params: RequestParams = {}) =>
@@ -494,7 +495,7 @@ export class Api<
      *
      * @tags ships
      * @name ShipsUpdate
-     * @summary Update a ship
+     * @summary Обновить поля корабля
      * @request PUT:/api/ships/{id}
      */
     shipsUpdate: (id: number, ship: DsShip, params: RequestParams = {}) =>
@@ -512,7 +513,7 @@ export class Api<
      *
      * @tags ships
      * @name ShipsDelete
-     * @summary Delete a ship
+     * @summary Удалить корабль
      * @request DELETE:/api/ships/{id}
      */
     shipsDelete: (id: number, params: RequestParams = {}) =>
@@ -544,7 +545,7 @@ export class Api<
      *
      * @tags ships
      * @name ShipsImageCreate
-     * @summary Добавление изображения
+     * @summary Добавить изображение
      * @request POST:/api/ships/{id}/image
      */
     shipsImageCreate: (
