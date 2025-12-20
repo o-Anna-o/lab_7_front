@@ -117,6 +117,25 @@ async function load(idToLoad: string | undefined) {
     return ()=> window.removeEventListener('lt:basket:refresh', handler)
   }, [id])
 
+  // Функция для обновления количества кораблей в локальном состоянии
+  const updateShipCount = (shipId: number, newCount: number) => {
+    if (request && request.Ships) {
+      const updatedShips = request.Ships.map(ship =>
+        ship.Ship.ShipID === shipId ? { ...ship, ShipsCount: newCount } : ship
+      );
+      setRequest({ ...request, Ships: updatedShips });
+    }
+  };
+
+  // Функция для сохранения количества кораблей в локальном состоянии
+  const onSaveShip = (shipId: number, count: number) => {
+    // Обновляем локальное состояние без вызова API
+    updateShipCount(shipId, count);
+    
+    // Отправляем событие обновления корзины
+    window.dispatchEvent(new CustomEvent('lt:basket:refresh'));
+  };
+
   async function onDeleteShip(shipId: number) {
     if (!request) return
     try {
@@ -269,39 +288,69 @@ const onFormation = () => {
             </form>
 
             <h2>Выбранные контейнеровозы</h2>
-            <div className="request__cards" style={{display:'flex', flexDirection:'column', gap:30}}>
+            <div className="request__cards" style={{display:'flex', flexDirection:'column', gap:20}}>
+              {/* Заголовок таблицы */}
+              <div className="request__card request__card-header">
+                <div className="card-header_request__card__title">Корабль</div>
+                <div className="card-header_request__card__photo">Фото</div>
+                <div className="card-header_request__card__capacity">Вместимость</div>
+                <div className="card-header_request__card__cranes">Краны</div>
+                <div className="card-header_request__card__count">Количество</div>
+                <div className="card-header_request__card__action">Действие</div>
+              </div>
+              
               {request.Ships && request.Ships.length > 0 ? (
                 request.Ships.map((s) => (
-                  <div key={s.Ship.ShipID} className="request__card" style={{display:'flex', flexDirection:'row', gap:40, width:1198, border:'2px solid #AA9B7D', padding:30, borderRadius:5}}>
-                    <h2 className="request__card__title" style={{width:148}}>{s.Ship.Name}</h2>
+                  <div key={s.Ship.ShipID} className="request__card" style={{display:'flex', flexDirection:'row', alignItems:'center', gap:20, width:1198, border:'2px solid #AA9B7D', padding: '15px 30px', borderRadius:5}}>
+                    <div className="request__card__title" style={{width:148}}>{s.Ship.Name}</div>
 
-                    {s.Ship.PhotoURL ? (
-                      <img className="request__card__ship-card__img"
-                           src={getShipImageUrl(s.Ship.PhotoURL)}
-                           style={{width:360}}
-                           alt={s.Ship.Name}
-                           onError={(ev)=> { (ev.target as HTMLImageElement).style.display = 'none' }}
-                      />
-                    ) : null}
-
-                    <div className="ship-card__text">
-                      <p><b>Вместимость:</b> {s.Ship.Capacity ?? '-'} TEU</p>
-                      <p><b>Габариты:</b> длина {s.Ship.Length ?? '-'} м, ширина {s.Ship.Width ?? '-'} м</p>
-                      <p><b>Краны:</b> {s.Ship.Cranes ?? '-'} одновременно</p>
+                    <div style={{width:200, height:100, display:'flex', alignItems:'center', justifyContent:'center'}}>
+                      {s.Ship.PhotoURL ? (
+                        <img className="request__card__ship-card__img"
+                             src={getShipImageUrl(s.Ship.PhotoURL)}
+                             style={{maxWidth:'100%', maxHeight:'100%'}}
+                             alt={s.Ship.Name}
+                             onError={(ev)=> { (ev.target as HTMLImageElement).style.display = 'none' }}
+                        />
+                      ) : (
+                        <div style={{color:'#888'}}>Нет фото</div>
+                      )}
                     </div>
 
-                    <div className="ship-card__other" style={{display:'flex', flexDirection:'column', gap:30}}>
-                      <div className="ship-card__other-item ship-card__cnt"><p>Количество</p><input className="ship-card__cnt-input" type="text" value={String(s.ShipsCount)} readOnly/></div>
+                    <div style={{width:120}}>{s.Ship.Capacity ?? '-'} TEU</div>
+                    <div style={{width:80}}>{s.Ship.Cranes ?? '-'}</div>
+                    
+                    <div style={{width:120}}>
+                      <input
+                        className="ship-card__cnt-input"
+                        type="number"
+                        value={s.ShipsCount}
+                        onChange={(e) => {
+                          const newCount = parseInt(e.target.value) || 1;
+                          updateShipCount(s.Ship.ShipID, newCount);
+                        }}
+                        min="1"
+                        style={{width:'100%'}}
+                      />
+                    </div>
 
-                      <div>
-                        <button
-                          type="button"
-                          className="ship-card__other-item ship-card__other-btn btn"
-                          onClick={()=> onDeleteShip(s.Ship.ShipID)}
-                        >
-                          Удалить
-                        </button>
-                      </div>
+                    <div style={{width:150, display:'flex', gap:10}}>
+                      <button
+                        type="button"
+                        className="ship-card__other-btn btn"
+                        onClick={()=> onSaveShip(s.Ship.ShipID, s.ShipsCount)}
+                        style={{padding: '8px 16px', fontSize: '16px', height: 'auto'}}
+                      >
+                        Сохранить
+                      </button>
+                      <button
+                        type="button"
+                        className="ship-card__other-btn btn"
+                        onClick={()=> onDeleteShip(s.Ship.ShipID)}
+                        style={{padding: '8px 16px', fontSize: '16px', height: 'auto'}}
+                      >
+                        Удалить
+                      </button>
                     </div>
                   </div>
                 ))
