@@ -26,7 +26,7 @@ body, .btn, p, h1, h2, h3, a {
     font-family: "Gilroy", sans-serif;
     color: #ffff;
     text-decoration: none;
-}  
+}
 p, h1, h2, h3, a {
     margin: 0;
     padding: 0;
@@ -45,8 +45,8 @@ h2 {
 p {
     font-size: 25px;
 }
-input {
-    font-size: 20px;
+input, select {
+    font-size: 25px;
 }
 .profile_link {
     float: right !important;
@@ -147,6 +147,7 @@ input {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    font-size: 22px;
     gap: 20px;
 
     width: 1198px;
@@ -157,8 +158,9 @@ input {
 
 .request__card-header {
     background-color: #AA9B7D;
-    color: #242422;
-    font-weight: 600;
+    color: #ffff;
+    font-size: 22px;
+    font-weight: 500;
 }
 
 .request__card__title {

@@ -166,12 +166,15 @@ export default function RequestShipsListPage() {
         <div className="request__filters">
           <div className="filter-item">
             <label>Статус:</label>
-            <input
-              type="text"
+            <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              placeholder="Введите статус"
-            />
+            >
+              <option value="">Все статусы</option>
+              <option value="сформирован">Сформирован</option>
+              <option value="завершена">Завершена</option>
+              <option value="отклонена">Отклонена</option>
+            </select>
           </div>
           <div className="filter-item">
             <label>Дата создания:</label>
@@ -215,8 +218,8 @@ export default function RequestShipsListPage() {
               const status = request.status || (request as any).Status || 'Не указан';
               const creationDate = request.creationDate || (request as any).CreationDate || (request as any).created_at || 'Не указана';
               const completionDate = request.completionDate || (request as any).CompletionDate || (request as any).completed_at || 'Не завершена';
-              const containers20 = (request as any).containers20 || (request as any).containers20ftCount || (request as any).containers_20ft_count || 0;
-              const containers40 = (request as any).containers40 || (request as any).containers40ftCount || (request as any).containers_40ft_count || 0;
+              const containers20 = request.containers20ftCount || (request as any).Containers20ftCount || (request as any).containers_20ft_count || (request as any).containers20 || 0;
+              const containers40 = request.containers40ftCount || (request as any).Containers40ftCount || (request as any).containers_40ft_count || (request as any).containers40 || 0;
               const resultTime = request.loadingTime || (request as any).LoadingTime || (request as any).loading_time || 0;
               
               // Проверяем, является ли заявка черновиком
