@@ -3,6 +3,7 @@ import { getToken } from './auth'
 import axios from 'axios'
 const API_BASE = '/api'
 
+// НЕ используем mock здесь — только бэкенд
 export type ShipsFilterParams = {
   search?: string
   capacity_min?: number

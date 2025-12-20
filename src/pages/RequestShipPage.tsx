@@ -1,7 +1,7 @@
 // src/pages/RequestShipPage.tsx
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getRequestShip, deleteShipFromRequest, deleteRequestShip, calculateLoadingTime } from '../apiLegacy'
+import { getRequestShip, deleteShipFromRequest, deleteRequestShip, calculateLoadingTime } from '../apii'
 import Navbar from '../components/Navbar'
 import Breadcrumbs from '../components/Breadcrumbs'
 

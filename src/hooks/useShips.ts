@@ -1,6 +1,6 @@
 // src/hooks/useShips.ts
 import { useEffect, useState } from 'react'
-import { getShips, ShipsFilterParams } from '../apiLegacy'
+import { getShips, ShipsFilterParams } from '../apii'
 import mock from '../mock'
 import { Ship } from '../types'
 

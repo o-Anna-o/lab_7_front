@@ -1,6 +1,6 @@
 
 import { Link, useNavigate } from 'react-router-dom'
-import { addShipToRequest } from '../apiLegacy'
+import { addShipToRequest } from '../apii'
 import { getToken } from '../auth'
 import '../../resources/ShipCard.css'
 
