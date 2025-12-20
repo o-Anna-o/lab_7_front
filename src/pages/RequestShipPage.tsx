@@ -309,10 +309,10 @@ const onFormation = () => {
               
               {request.Ships && request.Ships.length > 0 ? (
                 request.Ships.map((s) => (
-                  <div key={s.Ship.ShipID} className="request__card" style={{display:'flex', flexDirection:'row', alignItems:'center', gap:20, width:1198, border:'2px solid #AA9B7D', padding: '15px 30px', borderRadius:5}}>
-                    <div className="request__card__title" style={{width:148}}>{s.Ship.Name}</div>
+                  <div key={s.Ship.ShipID} className="request__card_table" >
+                    <div className="card-table_request__card__title">{s.Ship.Name}</div>
 
-                    <div style={{width:200, height:100, display:'flex', alignItems:'center', justifyContent:'center'}}>
+                    <div style={{width:200, height:100}}>
                       {s.Ship.PhotoURL ? (
                         <img className="request__card__ship-card__img"
                              src={getShipImageUrl(s.Ship.PhotoURL)}
@@ -325,10 +325,10 @@ const onFormation = () => {
                       )}
                     </div>
 
-                    <div style={{width:120}}>{s.Ship.Capacity ?? '-'} TEU</div>
-                    <div style={{width:30}}>{s.Ship.Cranes ?? '-'}</div>
+                    <div className="card-title_request__card__capacity">{s.Ship.Capacity ?? '-'} TEU</div>
+                    <div className="card-header_request__card__cranes">{s.Ship.Cranes ?? '-'}</div>
                     
-                    <div style={{width:150, display:'flex', alignItems:'center', gap:10}}>
+                    <div style={{width:150, display:'flex', alignItems:'center', gap:10 }}>
                       <button
                         type="button"
                         className="ship-card__other-btn btn"
@@ -422,7 +422,7 @@ const onFormation = () => {
                   onClick={onFormation}
                   disabled={loadingFormation}
                 >
-                  {loadingFormation ? "Формируется…" : "Сформировать заявку"}
+                  {loadingFormation ? "Формируется…" : "Сформировать"}
               </button>
 
               <button type="button" className="ship-card__btn beige-btn btn" onClick={onDeleteRequest} style={{marginLeft:10}}>

@@ -68,7 +68,7 @@ input, select {
     width: 262px;
 }
 .request {
-    width: 1350px;
+    width: 1450px;
     display: flex;
     flex-direction: column;
     justify-content:center;
@@ -148,12 +148,38 @@ input, select {
     justify-content: space-between;
     align-items: center;
     font-size: 22px;
-    gap: 20px;
+    gap: 5px !important;
 
     width: 1198px;
     border: solid 2px #AA9B7D;
     border-radius: 5px;
     padding: 20px 30px;
+}
+.request__card_table {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+
+    font-size: 22px;
+    width: 1198px;
+    border: solid 2px #AA9B7D;
+    border-radius: 5px;
+    padding: 20px 30px;
+}
+
+
+.card-table_request__card__title {
+    width: 100px;
+    text-align: center;
+}
+.card-title_request__card__capacity {
+    width: 200px;
+    text-align: center;
+}
+.card-header_request__card__cranes {
+    width: 50px;
+    text-align: center;
 }
 
 .request__card-header {
