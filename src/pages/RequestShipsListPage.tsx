@@ -68,7 +68,12 @@ export default function RequestShipsListPage() {
         })
         
         setRequests(userRequests)
-        setFilteredRequests(userRequests)
+        // Фильтруем заявки при загрузке - не отображаем черновики
+        const filteredUserRequests = userRequests.filter(request => {
+          const status = request.status || (request as any).Status || 'Не указан';
+          return !isDraft(status) && !isDeleted(status) && status.toLowerCase() !== 'черновик';
+        });
+        setFilteredRequests(filteredUserRequests)
         setLoading(false)
       } catch (err: any) {
         // Если ошибка авторизации, перенаправляем на страницу входа
@@ -171,7 +176,7 @@ export default function RequestShipsListPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="">Все статусы</option>
-              <option value="сформирован">Сформирован</option>
+              <option value="сформирован">Сформирована</option>
               <option value="завершена">Завершена</option>
               <option value="отклонена">Отклонена</option>
             </select>
@@ -185,7 +190,7 @@ export default function RequestShipsListPage() {
             />
           </div>
           <div className="filter-item">
-            <label>Дата оформления:</label>
+            <label>Дата завершения:</label>
             <input
               type="date"
               value={completionDateFilter}
@@ -222,6 +227,11 @@ export default function RequestShipsListPage() {
               const containers40 = request.containers40ftCount || (request as any).Containers40ftCount || (request as any).containers_40ft_count || (request as any).containers40 || 0;
               const resultTime = request.loadingTime || (request as any).LoadingTime || (request as any).loading_time || 0;
               
+              // Временные логи для отладки
+              console.log('Request data:', request);
+              console.log('creationDate field:', creationDate);
+              console.log('completionDate field:', completionDate);
+              
               // Проверяем, является ли заявка черновиком
               const isRequestDraft = isDraft(status);
               
@@ -235,7 +245,7 @@ export default function RequestShipsListPage() {
                     {creationDate ? new Date(creationDate).toLocaleDateString('ru-RU') : 'Не указана'}
                   </div>
                   <div className="request__card__completion-date">
-                    {completionDate && completionDate !== 'Не завершена' ? new Date(completionDate).toLocaleDateString('ru-RU') : 'нет'}
+                    {completionDate ? new Date(completionDate).toLocaleDateString('ru-RU') : 'нет'}
                   </div>
                   <div className="request__card__result">{resultTime}</div>
                 </div>
