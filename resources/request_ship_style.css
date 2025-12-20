@@ -105,12 +105,39 @@ input {
     color: #fff;
 }
 
+.request__filters {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-item label {
+    font-size: 18px;
+}
+
+.filter-item input {
+    background-color: #3A3A3A;
+    padding: 8px 12px;
+    border: solid 2px #AA9B7D;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 16px;
+}
+
 .request__cards {
     display: flex;
     flex-direction: column;
     justify-content:center;
     align-items: center;
-    gap: 30px;
+    gap: 20px;
     padding-top: 15px;
     padding-bottom: 15px;
 }
@@ -118,18 +145,48 @@ input {
 .request__card {
     display: flex;
     flex-direction: row;
-    justify-content:center;
+    justify-content: space-between;
     align-items: center;
-    gap: 40px;
+    gap: 20px;
 
     width: 1198px;
     border: solid 2px #AA9B7D;
     border-radius: 5px;
-    padding: 30px 40px;
+    padding: 20px 30px;
+}
+
+.request__card-header {
+    background-color: #AA9B7D;
+    color: #242422;
+    font-weight: 600;
 }
 
 .request__card__title {
-    width: 148px;
+    width: 80px;
+}
+
+.request__card__20ft {
+    width: 120px;
+}
+
+.request__card__40ft {
+    width: 120px;
+}
+
+.request__card__status {
+    width: 150px;
+}
+
+.request__card__creation-date {
+    width: 150px;
+}
+
+.request__card__completion-date {
+    width: 150px;
+}
+
+.request__card__result {
+    width: 120px;
 }
 
 .request__card__ship-card__img {
@@ -189,7 +246,7 @@ input {
     font-weight: 500;
     padding: 14px 32px;
     text-align: center;
-    border: none;          
+    border: none;
 }
 
 /* Стили для активной кнопки */
@@ -208,7 +265,7 @@ input {
 }
 
 .ship-card__btn-form {
-    display: contents; 
+    display: contents;
     margin: 0;
     padding: 0;
 }
