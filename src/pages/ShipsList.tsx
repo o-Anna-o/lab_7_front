@@ -6,6 +6,7 @@ import ShipCard from '../components/ShipCard'
 import { useShips } from '../hooks/useShips'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { setSearch, applySearch } from '../store/slices/filterSlice'
+import RequestShipBasket from '../components/RequestShipBasket'
 
 export default function ShipsList() {
   const dispatch = useAppDispatch()
@@ -27,7 +28,12 @@ export default function ShipsList() {
   return (
     <>
       <Navbar />
-      <Breadcrumbs />
+      <div style={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Breadcrumbs />
+        <div style={{ marginRight: '20px' }}>
+          <RequestShipBasket />
+        </div>
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <form
