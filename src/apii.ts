@@ -151,20 +151,42 @@ export async function calculateLoadingTime(requestId: number | string, payload: 
 
 // обновить количество конкретного корабля в заявке
 export async function updateShipCountInRequest(requestId: number | string, shipId: number | string, shipsCount: number) {
+  console.log('updateShipCountInRequest called with:', { requestId, shipId, shipsCount });
   const token = getToken()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json'
   }
   if (token) headers['Authorization'] = 'Bearer ' + token
 
-  const res = await axios.put(`${API_BASE}/request_ship/${requestId}/ships/${shipId}`, {
-    ships_count: shipsCount
-  }, {
-    headers,
-    withCredentials: true,
-  })
-  if (res.status < 200 || res.status >= 300) {
-    throw new Error('HTTP ' + res.status + (res.statusText ? ': ' + res.statusText : ''))
+  const url = `${API_BASE}/request_ship/${requestId}/ships/${shipId}`;
+  console.log('Making PUT request to:', url);
+  console.log('Request data:', { ships_count: shipsCount });
+  console.log('Headers:', headers);
+
+  try {
+    const res = await axios.put(url, {
+      ships_count: shipsCount
+    }, {
+      headers,
+      withCredentials: true,
+    })
+    console.log('Response status:', res.status);
+    console.log('Response data:', res.data);
+    if (res.status < 200 || res.status >= 300) {
+      throw new Error('HTTP ' + res.status + (res.statusText ? ': ' + res.statusText : ''))
+    }
+    return res.data
+  } catch (error) {
+    console.error('Error in updateShipCountInRequest:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers
+      });
+    }
+    throw error;
   }
-  return res.data
 }
