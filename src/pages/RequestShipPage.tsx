@@ -50,63 +50,63 @@ export default function RequestShipPage() {
   });
 
 
-async function load(idToLoad: string | undefined) {
-  if (!idToLoad) return
-  try {
-    setLoading(true)
-    const data = await getRequestShip(idToLoad) 
+  async function load(idToLoad: string | undefined) {
+    if (!idToLoad) return
+    try {
+      setLoading(true)
+      const data = await getRequestShip(idToLoad) 
 
-    const payload = data?.data ?? data
+      const payload = data?.data ?? data
 
-    if (!payload || typeof payload !== 'object') {
-      throw new Error('Unexpected request_ship payload')
+      if (!payload || typeof payload !== 'object') {
+        throw new Error('Unexpected request_ship payload')
+      }
+
+      const requestShipId = payload.request_ship_id
+      const containers20 = payload.containers_20ft_count ?? 0
+      const containers40 = payload.containers_40ft_count ?? 0
+      const commentVal = payload.comment ?? ''
+      const loadingTimeVal = payload.loading_time ?? ''
+
+      const rawShips = Array.isArray(payload.ships) ? payload.ships : []
+
+      const shipsNormalized = rawShips.map((si: any) => ({
+        Ship: {
+          ShipID: si.ship_id,
+          Name: si.name,
+          PhotoURL: si.photo_url,
+          Capacity: si.capacity,
+          Length: si.length,
+          Width: si.width,
+          Cranes: si.cranes
+        },
+        ShipsCount: si.ships_count ?? 1
+      }))
+
+      const rs: RequestShip = {
+        RequestShipID: requestShipId,
+        Containers20ftCount: containers20,
+        Containers40ftCount: containers40,
+        Comment: commentVal,
+        LoadingTime: loadingTimeVal,
+        Ships: shipsNormalized
+      }
+
+      setRequest(rs)
+      setContainers20(rs.Containers20ftCount ?? '')
+      setContainers40(rs.Containers40ftCount ?? '')
+      setComment(rs.Comment ?? '')
+      setResultTime(rs.LoadingTime ?? '')
+    } catch (e) {
+      console.error('load request error', e)
+      if (e instanceof Error && e.message.startsWith('HTTP 401')) {
+        navigate('/login')
+      }
+      setRequest(null)
+    } finally {
+      setLoading(false)
     }
-
-    const requestShipId = payload.request_ship_id
-    const containers20 = payload.containers_20ft_count ?? 0
-    const containers40 = payload.containers_40ft_count ?? 0
-    const commentVal = payload.comment ?? ''
-    const loadingTimeVal = payload.loading_time ?? ''
-
-    const rawShips = Array.isArray(payload.ships) ? payload.ships : []
-
-    const shipsNormalized = rawShips.map((si: any) => ({
-      Ship: {
-        ShipID: si.ship_id,
-        Name: si.name,
-        PhotoURL: si.photo_url,
-        Capacity: si.capacity,
-        Length: si.length,
-        Width: si.width,
-        Cranes: si.cranes
-      },
-      ShipsCount: si.ships_count ?? 1
-    }))
-
-    const rs: RequestShip = {
-      RequestShipID: requestShipId,
-      Containers20ftCount: containers20,
-      Containers40ftCount: containers40,
-      Comment: commentVal,
-      LoadingTime: loadingTimeVal,
-      Ships: shipsNormalized
-    }
-
-    setRequest(rs)
-    setContainers20(rs.Containers20ftCount ?? '')
-    setContainers40(rs.Containers40ftCount ?? '')
-    setComment(rs.Comment ?? '')
-    setResultTime(rs.LoadingTime ?? '')
-  } catch (e) {
-    console.error('load request error', e)
-    if (e instanceof Error && e.message.startsWith('HTTP 401')) {
-      navigate('/login')
-    }
-    setRequest(null)
-  } finally {
-    setLoading(false)
   }
-}
 
 
 
@@ -127,13 +127,22 @@ async function load(idToLoad: string | undefined) {
     }
   };
 
-  // Функция для сохранения количества кораблей в локальном состоянии
-  const onSaveShip = (shipId: number, count: number) => {
-    // Обновляем локальное состояние без вызова API
+  // Функция для сохранения количества кораблей в локальном состоянии и в базе данных
+  const onSaveShip = async (shipId: number, count: number) => {
+    // Обновляем локальное состояние
     updateShipCount(shipId, count);
     
-    // Отправляем событие обновления корзины
-    window.dispatchEvent(new CustomEvent('lt:basket:refresh'));
+    // Сохраняем в базе данных
+    try {
+      if (request) {
+        await updateShipCountInRequest(request.RequestShipID, shipId, count);
+        // Отправляем событие обновления корзины
+        window.dispatchEvent(new CustomEvent('lt:basket:refresh'));
+      }
+    } catch (error) {
+      console.error('Ошибка при сохранении количества кораблей:', error);
+      alert('Ошибка при сохранении количества кораблей');
+    }
   };
 
   async function onDeleteShip(shipId: number) {
@@ -183,7 +192,6 @@ const onFormation = () => {
     })
   );
 };
-
 
 
 
