@@ -88,7 +88,6 @@ export const getUserRequestShipsThunk = createAsyncThunk(
   }
 );
 
-
 // AsyncThunk для получения корзины заявок
 export const getRequestShipBasketThunk = createAsyncThunk(
   "requestShip/basket",
@@ -109,7 +108,50 @@ export const getRequestShipBasketThunk = createAsyncThunk(
   }
 );
 
+// Thunk для получения данных заявки
+export const fetchRequestShipThunk = createAsyncThunk(
+  'ships/fetchRequestShip',
+  async (id: number | string, { rejectWithValue }) => {
+    try {
+      // Реализация через API сервера
+      const response = await api.api.requestShipDetail(Number(id));
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Ошибка загрузки заявки');
+    }
+  }
+);
 
+// Thunk для удаления всей заявки
+export const removeRequestShipThunk = createAsyncThunk(
+  'ships/removeRequestShip',
+  async (requestId: number | string, { rejectWithValue }) => {
+    try {
+      // Реализация через API сервера
+      const response = await api.api.requestShipDelete(Number(requestId));
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Ошибка удаления заявки');
+    }
+  }
+);
+
+// Thunk для расчета времени погрузки
+export const calculateLoadingTimeThunk = createAsyncThunk(
+  'ships/calculateLoadingTime',
+  async ({ requestId, payload }: {
+    requestId: number | string;
+    payload: { containers_20ft?: number; containers_40ft?: number; comment?: string }
+  }, { rejectWithValue }) => {
+    try {
+      // Реализация через API сервера
+      const response = await api.api.requestShipsUpdate(Number(requestId), payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Ошибка расчета времени погрузки');
+    }
+  }
+);
 
 
 // Определяем интерфейс состояния для слайса заявок на корабли
