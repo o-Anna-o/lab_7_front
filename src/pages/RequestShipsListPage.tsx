@@ -20,7 +20,7 @@ export default function RequestShipsListPage() {
   // Состояния для фильтров
   const [statusFilter, setStatusFilter] = useState('')
   const [creationDateFilter, setCreationDateFilter] = useState('')
-  const [completionDateFilter, setCompletionDateFilter] = useState('')
+  const [formationDateFilter, setFormationDateFilter] = useState('')
 
   // Проверка авторизации при монтировании компонента
   useEffect(() => {
@@ -140,13 +140,13 @@ export default function RequestShipsListPage() {
       });
     }
 
-    // Фильтр по дате оформления (завершения)
-    if (completionDateFilter) {
+    // Фильтр по дате оформления
+    if (formationDateFilter) {
       result = result.filter(request => {
-        const completionDate = request.completionDate || (request as any).CompletionDate || (request as any).completed_at;
-        if (!completionDate) return false;
-        const requestDate = new Date(completionDate);
-        const filterDate = new Date(completionDateFilter);
+        const formationDate = request.formationDate || (request as any).FormationDate || (request as any).completed_at;
+        if (!formationDate) return false;
+        const requestDate = new Date(formationDate);
+        const filterDate = new Date(formationDateFilter);
         return requestDate.toDateString() === filterDate.toDateString();
       });
     }
@@ -190,11 +190,11 @@ export default function RequestShipsListPage() {
             />
           </div>
           <div className="filter-item">
-            <label>Дата завершения:</label>
+            <label>Дата формирования:</label>
             <input
               type="date"
-              value={completionDateFilter}
-              onChange={(e) => setCompletionDateFilter(e.target.value)}
+              value={formationDateFilter}
+              onChange={(e) => setFormationDateFilter(e.target.value)}
             />
           </div>
           <button className="btn btn-active" onClick={applyFilters}>Показать</button>
@@ -213,7 +213,7 @@ export default function RequestShipsListPage() {
               <div className="request__card__40ft">40 футов</div>
               <div className="request__card__status">Статус</div>
               <div className="request__card__creation-date">Дата создания</div>
-              <div className="request__card__completion-date">Дата оформления</div>
+              <div className="request__card__formation-date">Дата оформления</div>
               <div className="request__card__result">Результат</div>
             </div>
             
@@ -222,7 +222,7 @@ export default function RequestShipsListPage() {
               const requestId = request.requestShipID || (request as any).RequestShipID || (request as any).request_ship_id || (request as any).id;
               const status = request.status || (request as any).Status || 'Не указан';
               const creationDate = request.creationDate || (request as any).CreationDate || (request as any).created_at || 'Не указана';
-              const completionDate = request.completionDate || (request as any).CompletionDate || (request as any).completed_at || 'Не завершена';
+              const formationDate = request.formationDate || (request as any).FormationDate || (request as any).completed_at || 'Не завершена';
               const containers20 = request.containers20ftCount || (request as any).Containers20ftCount || (request as any).containers_20ft_count || (request as any).containers20 || 0;
               const containers40 = request.containers40ftCount || (request as any).Containers40ftCount || (request as any).containers_40ft_count || (request as any).containers40 || 0;
               const resultTime = request.loadingTime || (request as any).LoadingTime || (request as any).loading_time || 0;
@@ -230,7 +230,7 @@ export default function RequestShipsListPage() {
               // Временные логи для отладки
               console.log('Request data:', request);
               console.log('creationDate field:', creationDate);
-              console.log('completionDate field:', completionDate);
+              console.log('formationDate field:', formationDate);
               
               // Проверяем, является ли заявка черновиком
               const isRequestDraft = isDraft(status);
@@ -244,8 +244,8 @@ export default function RequestShipsListPage() {
                   <div className="request__card__creation-date">
                     {creationDate ? new Date(creationDate).toLocaleDateString('ru-RU') : 'Не указана'}
                   </div>
-                  <div className="request__card__completion-date">
-                    {completionDate ? new Date(completionDate).toLocaleDateString('ru-RU') : 'нет'}
+                  <div className="request__card__formation-date">
+                    {formationDate ? new Date(formationDate).toLocaleDateString('ru-RU') : 'нет'}
                   </div>
                   <div className="request__card__result">{resultTime}</div>
                 </div>
