@@ -96,7 +96,7 @@ export default function RequestShipsListPage() {
 
   // Эффект для применения фильтров по умолчанию при загрузке
   useEffect(() => {
-    if (requests.length > 0 && filteredRequests.length === 0) {
+    if (requests.length > 0) {
       applyFilters();
     }
   }, [requests]);
@@ -130,14 +130,17 @@ export default function RequestShipsListPage() {
       });
     }
 
-    // Фильтр по дате создания
-    if (creationDateFilter) {
+    // Фильтр по статусу (исключаем черновики и удаленные)
+    result = result.filter(request => {
+      const status = request.status || (request as any).Status || 'Не указан';
+      return !isDraft(status) && !isDeleted(status);
+    });
+
+    // Фильтр по статусу
+    if (statusFilter) {
       result = result.filter(request => {
-        const creationDate = request.creationDate || (request as any).CreationDate || (request as any).created_at;
-        if (!creationDate) return false;
-        const requestDate = new Date(creationDate);
-        const filterDate = new Date(creationDateFilter);
-        return requestDate.toDateString() === filterDate.toDateString();
+        const status = request.status || (request as any).Status || '';
+        return status.toLowerCase().includes(statusFilter.toLowerCase());
       });
     }
 
