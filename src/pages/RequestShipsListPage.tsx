@@ -208,13 +208,13 @@ export default function RequestShipsListPage() {
           <div className="request__cards">
             {/* Заголовок таблицы */}
             <div className="request__card request__card-header">
-              <div className="request__card__title">№</div>
-              <div className="request__card__20ft">20 футов</div>
-              <div className="request__card__40ft">40 футов</div>
-              <div className="request__card__status">Статус</div>
-              <div className="request__card__creation-date">Дата создания</div>
-              <div className="request__card__formation-date">Дата оформления</div>
-              <div className="request__card__result">Результат</div>
+              <div className=" card-header_request__card__title">№</div>
+              <div className=" card-header_request__card__20ft">20 футов</div>
+              <div className=" card-header_request__card__40ft">40 футов</div>
+              <div className=" card-header_request__card__status">Статус</div>
+              <div className=" card-header_request__card__creation-date">Дата создания</div>
+              <div className=" card-header_request__card__formation-date">Дата оформления</div>
+              <div className=" card-header_request__card__result">Результат</div>
             </div>
             
             {filteredRequests.map((request) => {
@@ -226,12 +226,7 @@ export default function RequestShipsListPage() {
               const containers20 = request.containers20ftCount || (request as any).Containers20ftCount || (request as any).containers_20ft_count || (request as any).containers20 || 0;
               const containers40 = request.containers40ftCount || (request as any).Containers40ftCount || (request as any).containers_40ft_count || (request as any).containers40 || 0;
               const resultTime = request.loadingTime || (request as any).LoadingTime || (request as any).loading_time || 0;
-              
-              // Временные логи для отладки
-              console.log('Request data:', request);
-              console.log('creationDate field:', creationDate);
-              console.log('formationDate field:', formationDate);
-              
+                           
               // Проверяем, является ли заявка черновиком
               const isRequestDraft = isDraft(status);
               

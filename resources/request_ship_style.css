@@ -162,17 +162,40 @@ input, select {
     font-size: 22px;
     font-weight: 500;
 }
+/*_______заголовок_таблицы____________*/
 
-.request__card__title {
-    width: 80px;
+.card-header_request__card__title, .request__card__title {
+    width: 20px;
 }
 
-.request__card__20ft {
+.card-header_request__card__20ft {
     width: 120px;
 }
 
-.request__card__40ft {
+.card-header_request__card__40ft {
     width: 120px;
+}
+
+.card-header_request__card__status {
+    width: 150px;
+}
+
+.card-header_request__card__creation-date {
+    width: 160px;
+}
+
+.card-header_request__card__completion-date {
+    width: 150px;
+}
+
+.card-header_request__card__result {
+    width: 120px;
+}
+
+/*_______строки таблицы________________*/
+
+.request__card__20ft, .request__card__40ft {
+    width: 50px;
 }
 
 .request__card__status {
@@ -180,7 +203,7 @@ input, select {
 }
 
 .request__card__creation-date {
-    width: 150px;
+    width: 160px;
 }
 
 .request__card__completion-date {
