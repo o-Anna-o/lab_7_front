@@ -19,7 +19,7 @@ export default function RequestShipsListPage() {
 
   // Состояния для фильтров
   const [statusFilter, setStatusFilter] = useState('')
-  const [creationDateFilter, setCreationDateFilter] = useState('')
+  const [creationDateFilter, setCreationDateFilter] = useState(new Date().toISOString().split('T')[0])
   const [formationDateFilter, setFormationDateFilter] = useState('')
 
   // Проверка авторизации при монтировании компонента
@@ -94,6 +94,13 @@ export default function RequestShipsListPage() {
     }
   }, [navigate])
 
+  // Эффект для применения фильтров по умолчанию при загрузке
+  useEffect(() => {
+    if (requests.length > 0 && filteredRequests.length === 0) {
+      applyFilters();
+    }
+  }, [requests]);
+
   // Функция для определения, является ли заявка черновиком
   const isDraft = (status: string) => {
     const normalizedStatus = status?.toLowerCase().trim();
@@ -115,17 +122,22 @@ export default function RequestShipsListPage() {
   const applyFilters = () => {
     let result = [...requests];
 
-    // Фильтр по статусу (исключаем черновики и удаленные)
-    result = result.filter(request => {
-      const status = request.status || (request as any).Status || 'Не указан';
-      return !isDraft(status) && !isDeleted(status);
-    });
-
     // Фильтр по статусу
     if (statusFilter) {
       result = result.filter(request => {
         const status = request.status || (request as any).Status || '';
         return status.toLowerCase().includes(statusFilter.toLowerCase());
+      });
+    }
+
+    // Фильтр по дате создания
+    if (creationDateFilter) {
+      result = result.filter(request => {
+        const creationDate = request.creationDate || (request as any).CreationDate || (request as any).created_at;
+        if (!creationDate) return false;
+        const requestDate = new Date(creationDate);
+        const filterDate = new Date(creationDateFilter);
+        return requestDate.toDateString() === filterDate.toDateString();
       });
     }
 
@@ -176,9 +188,9 @@ export default function RequestShipsListPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="">Все статусы</option>
-              <option value="сформирован">Сформирована</option>
-              <option value="завершена">Завершена</option>
-              <option value="отклонена">Отклонена</option>
+              <option value="сформирован">Сформирован</option>
+              <option value="завершен">Завершен</option>
+              <option value="отклонен">Отклонен</option>
             </select>
           </div>
           <div className="filter-item">
