@@ -298,13 +298,13 @@ const onFormation = () => {
             <h2>Выбранные контейнеровозы</h2>
             <div className="request__cards" style={{display:'flex', flexDirection:'column', gap:20}}>
               {/* Заголовок таблицы */}
-              <div className="request__card request__card-header">
-                <div className="card-header_request__card__title">Корабль</div>
-                <div className="card-header_request__card__photo">Фото</div>
-                <div className="card-header_request__card__capacity">Вместимость</div>
-                <div className="card-header_request__card__cranes">Краны</div>
-                <div className="card-header_request__card__count">Количество</div>
-                <div className="card-header_request__card__action">Действие</div>
+              <div className="request__card_table_header request__card-header">
+                <div className="card-header_request_busket__card__title">Корабль</div>
+                <div className="card-header_request_busket__card__photo">Фото</div>
+                <div className="card-header_request_busket__card__capacity">Вместимость</div>
+                <div className="card-header_request_busket__card__cranes">Краны</div>
+                <div className="card-header_request_busket__card__count">Количество</div>
+                <div className="card-header_request_busket__card__action">Действие</div>
               </div>
               
               {request.Ships && request.Ships.length > 0 ? (
@@ -326,7 +326,7 @@ const onFormation = () => {
                     </div>
 
                     <div className="card-title_request__card__capacity">{s.Ship.Capacity ?? '-'} TEU</div>
-                    <div className="card-header_request__card__cranes">{s.Ship.Cranes ?? '-'}</div>
+                    <div className="card-header_request_busket__card__cranes">{s.Ship.Cranes ?? '-'}</div>
                     
                     <div style={{width:150, display:'flex', alignItems:'center', gap:10 }}>
                       <button
