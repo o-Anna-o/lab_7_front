@@ -1,7 +1,7 @@
 
 import { Link, useNavigate } from 'react-router-dom'
-import { addShipToRequest } from '../apiLegacy'
 import { getToken } from '../auth'
+import { api } from '../api'
 import '../../resources/ShipCard.css'
 
 export default function ShipCard({ ship }: { ship: any }) {
@@ -27,7 +27,9 @@ export default function ShipCard({ ship }: { ship: any }) {
       return
     }
     try {
-      await addShipToRequest(Number(id))
+      await api.api.shipsAddToShipBucketCreate(Number(id), {
+        secure: true,
+      })
       window.dispatchEvent(new Event('lt:basket:refresh'))
     } catch (err: any) {
       alert('Ошибка: ' + (err.message || 'unknown'))

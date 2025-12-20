@@ -1,20 +1,21 @@
 // src/pages/RequestShipsListPage.tsx
-import React, { useEffect, useState } from 'react'
-import { api } from '../api'
+import React, { useEffect } from 'react'
 import { DsRequestShip } from '../api/Api'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { getToken } from '../auth'
 import '../../resources/request_ship_style.css'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { getUserRequestShipsThunk } from '../store/slices/requestShipSlice'
 
 // Компонент для отображения списка заявок пользователя
 export default function RequestShipsListPage() {
-  // Состояния для хранения данных заявок, состояния загрузки и ошибок
-  const [requests, setRequests] = useState<DsRequestShip[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  
+  // Получаем данные из Redux store
+  const { userRequests: requests, loading, error } = useAppSelector(state => state.requestShip);
 
   // Проверка авторизации при монтировании компонента
   useEffect(() => {
@@ -24,63 +25,16 @@ export default function RequestShipsListPage() {
       navigate('/login');
       return;
     }
-    
-    // Установка токена в заголовки API для авторизованных запросов
-    api.instance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    
   }, [navigate]);
 
   // Эффект для загрузки списка заявок пользователя
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        // Проверяем токен перед запросами
-        const token = getToken();
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-        
-        // Получаем данные профиля текущего пользователя
-        const userProfileResponse = await api.api.usersProfileList()
-        
-        // Получаем все заявки через кодогенерацию API
-        const response = await api.api.requestShipList()
-        
-        // Фильтруем заявки по текущему пользователю
-        const userRequests = response.data.filter(request => {
-          // Нормализация названий полей для заявки
-          const userId = request.userID || (request as any).UserID || (request as any).user_id || (request as any).userId;
-          
-          // Проверяем правильное поле для userID в данных профиля (нормализация названий)
-          const profileUserId = userProfileResponse.data.userID ||
-                                (userProfileResponse.data as any).UserID ||
-                                (userProfileResponse.data as any).UserId
-          
-          // Возвращаем только заявки текущего пользователя
-          return userId === profileUserId;
-        })
-        
-        setRequests(userRequests)
-        setLoading(false)
-      } catch (err: any) {
-        // Если ошибка авторизации, перенаправляем на страницу входа
-        if (err?.response?.status === 401) {
-          navigate('/login');
-          return;
-        }
-        
-        setError(err?.response?.data?.detail || err?.message || 'Ошибка загрузки заявок')
-        setLoading(false)
-      }
-    }
-
     // Проверяем токен перед загрузкой заявок
     const token = getToken();
     if (token) {
-      fetchRequests();
+      dispatch(getUserRequestShipsThunk());
     }
-  }, [navigate])
+  }, [dispatch]);
 
   // Функция для определения, является ли заявка черновиком
   const isDraft = (status: string) => {

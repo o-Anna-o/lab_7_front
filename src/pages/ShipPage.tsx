@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getShips } from '../apiLegacy'
+import { api } from '../api'
+import { DsShip } from '../api/Api'
 import ShipListIcon from '../components/ShipListIcon'
 import Breadcrumbs from '../components/Breadcrumbs'
 import mock from '../mock'
@@ -21,23 +22,23 @@ export default function ShipPage() {
     const load = async () => {
       setLoading(true)
       try {
-        const list = await getShips()
-        if (cancelled) return
+        const response = await api.api.shipsList({}, { secure: true });
+        if (cancelled) return;
 
-        const arr: any[] = Array.isArray(list) ? list : list?.data ?? list?.ships ?? []
-        const s = arr.find((x: any) =>
-          String(x.ship_id ?? x.ShipID ?? x.id ?? x.ID) === String(id)
-        )
+        const arr: DsShip[] = Array.isArray(response.data) ? response.data : [];
+        const s = arr.find((x: DsShip) =>
+          String(x.shipID) === String(id)
+        );
 
-        if (!cancelled) setShip(s ?? null)
+        if (!cancelled) setShip(s ?? null);
       } catch (err) {
-        console.warn('Backend unavailable → using mock', err)
+        console.warn('Backend unavailable → using mock', err);
         const s = mock.find((m: any) =>
           String(m.ship_id ?? m.ShipID ?? m.id ?? m.ID) === String(id)
-        )
-        if (!cancelled) setShip(s ?? null)
+        );
+        if (!cancelled) setShip(s ?? null);
       } finally {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) setLoading(false);
       }
     }
 
