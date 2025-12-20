@@ -1,7 +1,7 @@
 // src/pages/RequestShipPage.tsx
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getRequestShip, deleteShipFromRequest, deleteRequestShip, calculateLoadingTime } from '../apii'
+import { getRequestShip, deleteShipFromRequest, deleteRequestShip, calculateLoadingTime, updateShipCountInRequest } from '../apii'
 import Navbar from '../components/Navbar'
 import Breadcrumbs from '../components/Breadcrumbs'
 
@@ -318,9 +318,32 @@ const onFormation = () => {
                     </div>
 
                     <div style={{width:120}}>{s.Ship.Capacity ?? '-'} TEU</div>
-                    <div style={{width:80}}>{s.Ship.Cranes ?? '-'}</div>
+                    <div style={{width:30}}>{s.Ship.Cranes ?? '-'}</div>
                     
-                    <div style={{width:120}}>
+                    <div style={{width:150, display:'flex', alignItems:'center', gap:10}}>
+                      <button
+                        type="button"
+                        className="ship-card__other-btn btn"
+                        onClick={() => {
+                          // Уменьшаем количество кораблей на 1
+                          const newCount = Math.max(1, s.ShipsCount - 1);
+                          // Обновляем локальное состояние
+                          updateShipCount(s.Ship.ShipID, newCount);
+                        }}
+                        style={{
+                          width: '30px',
+                          height: '30px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: 0,
+                          fontSize: '16px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        -
+                      </button>
                       <input
                         className="ship-card__cnt-input"
                         type="number"
@@ -330,8 +353,31 @@ const onFormation = () => {
                           updateShipCount(s.Ship.ShipID, newCount);
                         }}
                         min="1"
-                        style={{width:'100%'}}
+                        style={{width:'80px', textAlign:'center'}}
                       />
+                      <button
+                        type="button"
+                        className="ship-card__other-btn btn"
+                        onClick={() => {
+                          // Увеличиваем количество кораблей на 1
+                          const newCount = s.ShipsCount + 1;
+                          // Обновляем локальное состояние
+                          updateShipCount(s.Ship.ShipID, newCount);
+                        }}
+                        style={{
+                          width: '30px',
+                          height: '30px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: 0,
+                          fontSize: '16px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        +
+                      </button>
                     </div>
 
                     <div style={{width:150, display:'flex', gap:10}}>
