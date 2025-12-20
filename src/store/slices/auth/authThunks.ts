@@ -47,6 +47,8 @@ export const loginUserShipThunk = createAsyncThunk(
   }
 );
 
+
+
 // Асинхронный thunk для регистрации пользователя
 export const registerUserShipThunk = createAsyncThunk(
   'auth/register',
