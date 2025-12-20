@@ -48,6 +48,69 @@ export const formRequestShipThunk = createAsyncThunk(
   }
 );
 
+// AsyncThunk для получения списка заявок пользователя
+export const getUserRequestShipsThunk = createAsyncThunk(
+  "requestShip/userRequests",
+  async (_, thunkAPI) => {
+    try {
+      // Получаем данные профиля текущего пользователя
+      const userProfileResponse = await api.api.usersProfileList({
+        // Указываем, что запрос защищенный (требует авторизации)
+        secure: true,
+      });
+      
+      // Получаем все заявки через кодогенерацию API
+      const response = await api.api.requestShipList({}, {
+        // Указываем, что запрос защищенный (требует авторизации)
+        secure: true,
+      });
+      
+      // Фильтруем заявки по текущему пользователю
+      const userRequests = response.data.filter(request => {
+        // Нормализация названий полей для заявки
+        const userId = request.userID || (request as any).UserID || (request as any).user_id || (request as any).userId;
+        
+        // Проверяем правильное поле для userID в данных профиля (нормализация названий)
+        const profileUserId = userProfileResponse.data.userID ||
+                              (userProfileResponse.data as any).UserID ||
+                              (userProfileResponse.data as any).UserId;
+        
+        // Возвращаем только заявки текущего пользователя
+        return userId === profileUserId;
+      });
+      
+      // Возвращаем список заявок пользователя
+      return userRequests;
+    } catch (e: any) {
+      // В случае ошибки возвращаем отклоненное значение с сообщением об ошибке
+      return thunkAPI.rejectWithValue(e?.message || "Ошибка получения заявок");
+    }
+  }
+);
+
+
+// AsyncThunk для получения корзины заявок
+export const getRequestShipBasketThunk = createAsyncThunk(
+  "requestShip/basket",
+  async (_, thunkAPI) => {
+    try {
+      // Выполняем запрос к API для получения корзины заявок через кодогенерацию
+      const response = await api.api.requestsBasketList({
+        // Указываем, что запрос защищенный (требует авторизации)
+        secure: true,
+      });
+
+      // Возвращаем данные корзины
+      return response.data;
+    } catch (e: any) {
+      // В случае ошибки возвращаем отклоненное значение с сообщением об ошибке
+      return thunkAPI.rejectWithValue(e?.message || "Ошибка получения корзины");
+    }
+  }
+);
+
+
+
 
 // Определяем интерфейс состояния для слайса заявок на корабли
 interface RequestShipState {

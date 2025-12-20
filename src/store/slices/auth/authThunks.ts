@@ -81,13 +81,11 @@ export const logoutUserShipThunk = createAsyncThunk(
       // Вызываем API для выхода
       await api.api.usersLogoutCreate();
     } catch (error) {
-      // Даже если API вызов не удался, мы все равно очищаем токен
       console.error('Ошибка при выходе:', error);
     } finally {
       // Очищаем токен из localStorage
       clearToken();
       
-      // Здесь нет необходимости диспатчить logout, так как это будет сделано в компоненте
     }
   }
 );
