@@ -1,45 +1,33 @@
 // src/pages/LoginPage.tsx
-import React, { useState } from 'react'
-import { saveToken } from '../auth'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from "../api" // импорт сгенерированного API
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { loginUserShipThunk } from '../store/slices/auth/authThunks'
+import { clearError } from '../store/slices/auth/authSlice'
 
 export default function LoginPage() {
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const dispatch = useAppDispatch()
+  const { loading, error } = useAppSelector((state) => state.auth)
   const navigate = useNavigate()
+
+  // Очищаем ошибки при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      dispatch(clearError())
+    }
+  }, [dispatch])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-
-    try {
-      
-
-      // вызываем метод из кодогенерации
-      const data = await api.api.usersLoginCreate({ login, password })
-
-      
-      const token =
-        (data.data as any)?.token ||
-        (data.data as any)?.access_token ||
-        (data.data as any)?.jwt
-
-      if (!token) {
-        setError('Токен не получен')
-        
-        return
-      }
-
-      saveToken(token)
+    
+    // Выполняем thunk для входа
+    const result = await dispatch(loginUserShipThunk({ login, password }))
+    
+    // Если вход успешен, перенаправляем на страницу кораблей
+    if (loginUserShipThunk.fulfilled.match(result)) {
       navigate('/ships')
-    } catch (err: any) {
-      
-      if (err?.response?.data) {
-        
-      }
-      setError(err?.response?.data?.detail || err?.message || 'Ошибка входа')
     }
   }
 
@@ -55,6 +43,7 @@ export default function LoginPage() {
               placeholder="Логин"
               value={login}
               onChange={e => setLogin(e.target.value)}
+              disabled={loading}
             />
           </div>
           <div style={{ marginBottom: 10 }}>
@@ -64,9 +53,12 @@ export default function LoginPage() {
               placeholder="Пароль"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
-          <button className="btn" type="submit">Войти</button>
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? 'Вход...' : 'Войти'}
+          </button>
         </form>
 
         <div style={{ marginTop: 15 }}>

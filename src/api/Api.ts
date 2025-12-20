@@ -242,33 +242,27 @@ export class Api<
 > extends HttpClient<SecurityDataType> {
   api = {
     /**
-     * @description Retrieve details of a specific request with its ships
+     * @description Update fields of an existing request
      *
      * @tags request_ships
-     * @name RequestShipDetail
-     * @summary Одна заявка на расчет времени погрузки
-     * @request GET:/api/request_ship/{id}
+     * @name RequestShipsUpdate
+     * @summary Изменение полей заявки
+     * @request PUT:/api/request-ships/{id}
      */
-    requestShipDetail: (id: number, params: RequestParams = {}) =>
+    requestShipsUpdate: (
+      id: number,
+      request: {
+        comment?: string;
+        containers_20ft_count?: number;
+        containers_40ft_count?: number;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<object, object>({
-        path: `/api/request_ship/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Remove an entire request from the system
-     *
-     * @tags request_ships
-     * @name RequestShipDelete
-     * @summary Удаление всей заявки
-     * @request DELETE:/api/request_ship/{id}
-     */
-    requestShipDelete: (id: number, params: RequestParams = {}) =>
-      this.request<object, object>({
-        path: `/api/request_ship/${id}`,
-        method: "DELETE",
+        path: `/api/request-ships/${id}`,
+        method: "PUT",
+        body: request,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -277,11 +271,11 @@ export class Api<
      * @description Allow port_operator to complete or reject a formed request
      *
      * @tags request_ships
-     * @name RequestShipCompletionCreate
+     * @name RequestShipsCompletionCreate
      * @summary Завершить или отклонить заявку (модератор)
-     * @request POST:/api/request_ship/{id}/completion
+     * @request POST:/api/request-ships/{id}/completion
      */
-    requestShipCompletionCreate: (
+    requestShipsCompletionCreate: (
       id: number,
       data: {
         /** Action (complete or reject) */
@@ -290,7 +284,7 @@ export class Api<
       params: RequestParams = {},
     ) =>
       this.request<object, object>({
-        path: `/api/request_ship/${id}/completion`,
+        path: `/api/request-ships/${id}/completion`,
         method: "POST",
         body: data,
         type: ContentType.FormData,
@@ -321,6 +315,38 @@ export class Api<
         path: `/api/request_ship`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Retrieve details of a specific request with its ships
+     *
+     * @tags request_ships
+     * @name RequestShipDetail
+     * @summary Одна заявка на расчет времени погрузки
+     * @request GET:/api/request_ship/{id}
+     */
+    requestShipDetail: (id: number, params: RequestParams = {}) =>
+      this.request<object, object>({
+        path: `/api/request_ship/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Remove an entire request from the system
+     *
+     * @tags request_ships
+     * @name RequestShipDelete
+     * @summary Удаление всей заявки
+     * @request DELETE:/api/request_ship/{id}
+     */
+    requestShipDelete: (id: number, params: RequestParams = {}) =>
+      this.request<object, object>({
+        path: `/api/request_ship/${id}`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),
@@ -390,13 +416,13 @@ export class Api<
      * @description Retrieve the count of ships in the user's draft request
      *
      * @tags request_ships
-     * @name RequestShipBasketList
+     * @name RequestsBasketList
      * @summary Получить корзину запросов
-     * @request GET:/api/request_ship/basket
+     * @request GET:/api/requests/basket
      */
-    requestShipBasketList: (params: RequestParams = {}) =>
+    requestsBasketList: (params: RequestParams = {}) =>
       this.request<object, object>({
-        path: `/api/request_ship/basket`,
+        path: `/api/requests/basket`,
         method: "GET",
         format: "json",
         ...params,

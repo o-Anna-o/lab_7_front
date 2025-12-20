@@ -11,12 +11,17 @@ import ProfilePage from './pages/ProfilePage'
 import RequestShipsListPage from './pages/RequestShipsListPage'
 import { clearToken } from './auth'
 import { useEffect } from 'react'
+import { useAppDispatch } from './store/hooks'
+import { logout } from './store/slices/auth/authSlice'
 
 export default function App(){
+  const dispatch = useAppDispatch();
+
   // Сброс токена при загрузке приложения (перезагрузке страницы)
   useEffect(() => {
     clearToken();
-  }, []);
+    dispatch(logout());
+  }, [dispatch]);
 
   return (
     <BrowserRouter>

@@ -1,42 +1,39 @@
 // src/pages/RegisterPage.tsx
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from "../api" // импорт сгенерированного API
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { registerUserShipThunk } from '../store/slices/auth/authThunks'
+import { clearError } from '../store/slices/auth/authSlice'
 
 export default function RegisterPage() {
   const [fio, setFio] = useState('')
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const dispatch = useAppDispatch()
+  const { loading, error } = useAppSelector((state) => state.auth)
   const navigate = useNavigate()
+
+  // Очищаем ошибки при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      dispatch(clearError())
+    }
+  }, [dispatch])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-
-    try {
-      
-
-      // вызываем метод из кодогенерации
-      const data = await api.api.usersRegisterCreate({
-        fio,
-        login,
-        password,
-        role: "creator"
-      })
-
-      
-      navigate('/login') // редирект после успешной регистрации
-
-    } catch (err: any) {
-      
-
-      // Axios-подобная структура ошибки
-      if (err?.response?.data) {
-        
-      }
-
-      setError(err?.response?.data?.detail || err?.message || 'Ошибка регистрации')
+    
+    // Выполняем thunk для регистрации
+    const result = await dispatch(registerUserShipThunk({
+      fio,
+      login,
+      password,
+      role: "creator"
+    }))
+    
+    // Если регистрация успешна, перенаправляем на страницу входа
+    if (registerUserShipThunk.fulfilled.match(result)) {
+      navigate('/login')
     }
   }
 
@@ -54,6 +51,7 @@ export default function RegisterPage() {
               placeholder="ФИО"
               value={fio}
               onChange={e => setFio(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -63,6 +61,7 @@ export default function RegisterPage() {
               placeholder="Логин"
               value={login}
               onChange={e => setLogin(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -73,10 +72,13 @@ export default function RegisterPage() {
               placeholder="Пароль"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
 
-          <button className="btn" type="submit">Зарегистрироваться</button>
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+          </button>
         </form>
 
         <div style={{ marginTop: 15 }}>

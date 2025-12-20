@@ -1,11 +1,12 @@
 // src/pages/RequestShipPage.tsx
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { getRequestShip, deleteShipFromRequest, deleteRequestShip, calculateLoadingTime } from '../apiLegacy'
 import Navbar from '../components/Navbar'
 import Breadcrumbs from '../components/Breadcrumbs'
 
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { formRequestShipThunk, getRequestShipBasketThunk } from "../store/slices/requestShipSlice";
+import { formRequestShipThunk } from "../store/slices/requestShipSlice";
 
 import { api } from "../api" // импорт сгенерированного API
 
@@ -49,39 +50,37 @@ export default function RequestShipPage() {
   });
 
 
- async function load(idToLoad: string | undefined) {
+async function load(idToLoad: string | undefined) {
   if (!idToLoad) return
   try {
     setLoading(true)
-    const response = await api.api.requestShipDetail(Number(idToLoad), {
-      secure: true,
-    })
+    const data = await getRequestShip(idToLoad) 
 
-    const payload: any = response.data;
+    const payload = data?.data ?? data
 
     if (!payload || typeof payload !== 'object') {
       throw new Error('Unexpected request_ship payload')
     }
 
-    const requestShipId = payload.requestShipID || payload.RequestShipID || payload.request_ship_id || payload.id || 0;
-    const containers20 = payload.containers20ftCount || payload.containers_20ft_count || 0;
-    const containers40 = payload.containers40ftCount || payload.containers_40ft_count || 0;
-    const commentVal = payload.comment || '';
-    const loadingTimeVal = payload.loadingTime || payload.loading_time || '';
+    const requestShipId = payload.request_ship_id
+    const containers20 = payload.containers_20ft_count ?? 0
+    const containers40 = payload.containers_40ft_count ?? 0
+    const commentVal = payload.comment ?? ''
+    const loadingTimeVal = payload.loading_time ?? ''
 
-    const rawShips = Array.isArray(payload.ships) ? payload.ships : [];
+    const rawShips = Array.isArray(payload.ships) ? payload.ships : []
 
     const shipsNormalized = rawShips.map((si: any) => ({
       Ship: {
-        ShipID: si.ship?.shipID || si.ship?.ShipID || si.ship?.ship_id || si.ship_id || 0,
-        Name: si.ship?.name || si.ship?.Name || '',
-        PhotoURL: si.ship?.photoURL || si.ship?.PhotoURL || si.ship?.photo_url || '',
-        Capacity: si.ship?.capacity || si.ship?.Capacity || 0,
-        Length: si.ship?.length || si.ship?.Length || 0,
-        Width: si.ship?.width || si.ship?.Width || 0,
-        Cranes: si.ship?.cranes || si.ship?.Cranes || 0
+        ShipID: si.ship_id,
+        Name: si.name,
+        PhotoURL: si.photo_url,
+        Capacity: si.capacity,
+        Length: si.length,
+        Width: si.width,
+        Cranes: si.cranes
       },
-      ShipsCount: si.shipsCount || si.ships_count || si.ShipsCount || 1
+      ShipsCount: si.ships_count ?? 1
     }))
 
     const rs: RequestShip = {
@@ -98,9 +97,9 @@ export default function RequestShipPage() {
     setContainers40(rs.Containers40ftCount ?? '')
     setComment(rs.Comment ?? '')
     setResultTime(rs.LoadingTime ?? '')
-  } catch (e: any) {
+  } catch (e) {
     console.error('load request error', e)
-    if (e?.response?.status === 401) {
+    if (e instanceof Error && e.message.startsWith('HTTP 401')) {
       navigate('/login')
     }
     setRequest(null)
@@ -119,18 +118,14 @@ export default function RequestShipPage() {
   }, [id])
 
   async function onDeleteShip(shipId: number) {
-    if (!request || !id) return
+    if (!request) return
     try {
-      await api.api.requestShipShipsDelete(Number(id), shipId, {
-        secure: true,
-      })
-      await load(String(id))
-      // Обновляем корзину
-      const dispatch = useAppDispatch();
-      dispatch(getRequestShipBasketThunk());
-    } catch(e: any) {
+      await deleteShipFromRequest(request.RequestShipID, shipId)
+      await load(String(request.RequestShipID))
+      window.dispatchEvent(new CustomEvent('lt:basket:refresh'))
+    } catch(e) {
       console.error('deleteShip error', e)
-      alert('Ошибка удаления корабля: ' + (e?.message || 'Неизвестная ошибка'))
+      alert('Ошибка удаления корабля')
     }
   }
 
@@ -165,7 +160,7 @@ const onFormation = () => {
       id: Number(id),
       containers20: c20,
       containers40: c40,
-      comment: comment || "", 
+      comment: comment || "",
     })
   );
 };
@@ -174,47 +169,35 @@ const onFormation = () => {
 
 
   async function onDeleteRequest() {
-    if (!request || !id) return
+    if (!request) return
 
     try {
-      await api.api.requestShipDelete(Number(id), {
-        secure: true,
-      })
+      await api.api.requestShipDelete(request.RequestShipID)
 
       navigate('/ships')
       window.dispatchEvent(new CustomEvent('lt:basket:refresh'))
-    } catch (e: any) {
+    } catch (e) {
       console.error('deleteRequest error', e)
-      alert('Ошибка удаления заявки: ' + (e?.message || 'Неизвестная ошибка'))
+      alert('Ошибка удаления заявки')
     }
   }
 
   async function onCalculate(e?: React.FormEvent) {
     e?.preventDefault()
-    if (!request || !id) return
+    if (!request) return
     try {
       const payload = {
         containers_20ft: Number(containers20) || 0,
         containers_40ft: Number(containers40) || 0,
         comment: comment ?? ''
       }
-      
-      // Для расчета времени погрузки используем специальный эндпоинт
-      // Поскольку в сгенерированном API нет этого метода, используем axios напрямую
-      await api.instance.post(`/api/request_ship/calculate_loading_time/${id}`, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...api.instance.defaults.headers.common,
-        },
-        withCredentials: true,
-      });
-      
+      await calculateLoadingTime(request.RequestShipID, payload)
       // загрузим обновлённую заявку
-      await load(String(id))
+      await load(String(request.RequestShipID))
       window.dispatchEvent(new CustomEvent('lt:basket:refresh'))
-    } catch (err: any) {
+    } catch (err) {
       console.error('calculate error', err)
-      alert('Ошибка расчёта: ' + (err?.message || 'Неизвестная ошибка'))
+      alert('Ошибка расчёта')
     }
   }
 
@@ -349,7 +332,7 @@ const onFormation = () => {
     </div>
 
     </>
-
+  
   )
 }
 

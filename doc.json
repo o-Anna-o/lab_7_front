@@ -10,7 +10,7 @@
     "host": "",
     "basePath": "",
     "paths": {
-        "/api/request_ship/{id}": {
+        "/api/request-ships/{id}": {
             "put": {
                 "description": "Update fields of an existing request",
                 "consumes": [
@@ -74,7 +74,7 @@
                 }
             }
         },
-        "/api/request_ship/{id}/completion": {
+        "/api/request-ships/{id}/completion": {
             "post": {
                 "description": "Allow port_operator to complete or reject a formed request",
                 "produces": [
@@ -415,7 +415,7 @@
                 }
             }
         },
-        "/api/request_ship/basket": {
+        "/api/requests/basket": {
             "get": {
                 "description": "Retrieve the count of ships in the user's draft request",
                 "produces": [

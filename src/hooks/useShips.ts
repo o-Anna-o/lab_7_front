@@ -1,9 +1,8 @@
 // src/hooks/useShips.ts
 import { useEffect, useState } from 'react'
-import { api } from '../api'
+import { getShips, ShipsFilterParams } from '../apiLegacy'
 import mock from '../mock'
 import { Ship } from '../types'
-import { DsShip } from '../api/Api'
 
 type ShipForFilter = { Name?: string; name?: string; [key: string]: any }
 
@@ -19,44 +18,45 @@ export function useShips(appliedSearch?: string) {
       setLoading(true)
       setError(null)
 
+      const params: ShipsFilterParams | undefined = appliedSearch
+        ? { search: appliedSearch }
+        : undefined
+
       try {
-        const response = await api.api.shipsList(
-          appliedSearch ? { name: appliedSearch } : undefined,
-          { secure: true }
-        );
+        const res = await getShips(params)
 
         // бекенд возвращает в поле data или массив
-        let arr: DsShip[] = Array.isArray(response.data) ? response.data : [];
-        
-        // Преобразуем DsShip в Ship
-        const ships: Ship[] = arr.map(ship => ({
-          ship_id: ship.shipID || 0,
-          name: ship.name || '',
-          description: ship.description || null,
-          capacity: ship.capacity || null,
-          length: ship.length || null,
-          width: ship.width || null,
-          draft: ship.draft || null,
-          cranes: ship.cranes || null,
-          containers: ship.containers || null,
-          photo_url: ship.photoURL || null,
-        }));
+        let arr = Array.isArray(res) ? res : res?.data ?? []
 
-        if (!cancelled) setShips(ships);
-      } catch (err) {
-        // fallback на mock
-        let arr = mock;
-
-        if (appliedSearch) {
-          const s = appliedSearch.toLowerCase();
-          arr = arr.filter(ship =>
-            ship.name.toLowerCase().includes(s)
-          );
+        if (params?.search) {
+          const searchLower = params.search.toLowerCase()
+          arr = arr.filter((ship: ShipForFilter) => {
+            const name =
+              ship.Name ??
+              ship.name ??
+              ''
+            return name.toLowerCase().includes(searchLower)
+          })
         }
 
-        if (!cancelled) setShips(arr);
+        if (!cancelled) setShips(arr)
+      } catch (err) {
+        
+
+        // fallback на mock
+        let arr = mock
+
+        if (appliedSearch) {
+          const s = appliedSearch.toLowerCase()
+          arr = arr.filter(ship =>
+            ship.name.toLowerCase().includes(s)
+          )
+        }
+
+        if (!cancelled) setShips(arr)
+          
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoading(false)
       }
     }
 
