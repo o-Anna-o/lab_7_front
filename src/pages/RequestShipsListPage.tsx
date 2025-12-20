@@ -235,7 +235,7 @@ export default function RequestShipsListPage() {
                     {creationDate ? new Date(creationDate).toLocaleDateString('ru-RU') : 'Не указана'}
                   </div>
                   <div className="request__card__completion-date">
-                    {completionDate && new Date(completionDate).toString() !== 'Invalid Date' ? new Date(completionDate).toLocaleDateString('ru-RU') : 'нет'}
+                    {completionDate && completionDate !== 'Не завершена' ? new Date(completionDate).toLocaleDateString('ru-RU') : 'нет'}
                   </div>
                   <div className="request__card__result">{resultTime}</div>
                 </div>

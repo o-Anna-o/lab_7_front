@@ -123,13 +123,13 @@ input, select {
     font-size: 18px;
 }
 
-.filter-item input {
+.filter-item input, .filter-item select {
     background-color: #3A3A3A;
     padding: 8px 12px;
     border: solid 2px #AA9B7D;
     border-radius: 5px;
     color: #fff;
-    font-size: 16px;
+    font-size: 22px;
 }
 
 .request__cards {
