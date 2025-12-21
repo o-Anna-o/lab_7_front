@@ -157,8 +157,6 @@ export default function RequestShipPage() {
     }
   }
 
-// _________________________кодогенерация__________________________________
-
 //  Redux Thunk версия onFormation 
 
 const dispatch = useAppDispatch();
@@ -210,7 +208,7 @@ const onSaveRequestShip = async () => {
       comment: comment || "",
     });
 
-    alert("Заявка сохранена");
+    // alert("Заявка сохранена");
     window.dispatchEvent(new CustomEvent("lt:basket:refresh"));
   } catch (e) {
     console.error("save request error", e);

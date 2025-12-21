@@ -8,8 +8,6 @@ import '../resources/index_style.css'
 import '../resources/request_ship_style.css'
 import '../resources/ship_style.css'
 
-import "./api/axiosSetup";
-
 import { Provider } from 'react-redux'
 import { store } from './store'
 
