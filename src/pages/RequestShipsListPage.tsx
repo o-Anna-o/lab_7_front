@@ -212,7 +212,7 @@ export default function RequestShipsListPage() {
               onChange={(e) => setFormationDateFilter(e.target.value)}
             />
           </div>
-          <button className="btn btn-active" onClick={applyFilters}>Показать</button>
+          <button className="show_btn btn btn-active" onClick={applyFilters}>Показать</button>
         </div>
         
         {/* Отображение сообщения, если у пользователя нет заявок */}

@@ -108,11 +108,16 @@ input, select {
 .request__filters {
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    justify-content: space-between;
+    /*gap: 20px;*/
     align-items: end;
     margin-bottom: 20px;
+    width: 1198px;
 }
-
+.show_btn {
+    width: 180px;
+    height: 40px;
+}
 .filter-item {
     display: flex;
     flex-direction: column;
