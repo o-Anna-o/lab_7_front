@@ -37,7 +37,7 @@ export default function RequestShipPage() {
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(false)
-  const [request, setRequest] = useState<RequestShip | null>(null)
+  const [requestShip, setRequestShip] = useState<RequestShip | null>(null)
   const [containers20, setContainers20] = useState<number | ''>('')
   const [containers40, setContainers40] = useState<number | ''>('')
   const [comment, setComment] = useState<string>('')
@@ -92,7 +92,7 @@ export default function RequestShipPage() {
         Ships: shipsNormalized
       }
 
-      setRequest(rs)
+      setRequestShip(rs)
       setContainers20(rs.Containers20ftCount ?? '')
       setContainers40(rs.Containers40ftCount ?? '')
       setComment(rs.Comment ?? '')
@@ -102,7 +102,7 @@ export default function RequestShipPage() {
       if (e instanceof Error && e.message.startsWith('HTTP 401')) {
         navigate('/login')
       }
-      setRequest(null)
+      setRequestShip(null)
     } finally {
       setLoading(false)
     }
@@ -119,11 +119,11 @@ export default function RequestShipPage() {
 
   // Функция для обновления количества кораблей в локальном состоянии
   const updateShipCount = (shipId: number, newCount: number) => {
-    if (request && request.Ships) {
-      const updatedShips = request.Ships.map(ship =>
+    if (requestShip && requestShip.Ships) {
+      const updatedShips = requestShip.Ships.map(ship =>
         ship.Ship.ShipID === shipId ? { ...ship, ShipsCount: newCount } : ship
       );
-      setRequest({ ...request, Ships: updatedShips });
+      setRequestShip({ ...requestShip, Ships: updatedShips });
     }
   };
 
@@ -134,8 +134,8 @@ export default function RequestShipPage() {
     
     // Сохраняем в базе данных
     try {
-      if (request) {
-        await updateShipCountInRequest(request.RequestShipID, shipId, count);
+      if (requestShip) {
+        await updateShipCountInRequest(requestShip.RequestShipID, shipId, count);
         // Отправляем событие обновления корзины
         window.dispatchEvent(new CustomEvent('lt:basket:refresh'));
       }
@@ -146,10 +146,10 @@ export default function RequestShipPage() {
   };
 
   async function onDeleteShip(shipId: number) {
-    if (!request) return
+    if (!requestShip) return
     try {
-      await deleteShipFromRequest(request.RequestShipID, shipId)
-      await load(String(request.RequestShipID))
+      await deleteShipFromRequest(requestShip.RequestShipID, shipId)
+      await load(String(requestShip.RequestShipID))
       window.dispatchEvent(new CustomEvent('lt:basket:refresh'))
     } catch(e) {
       console.error('deleteShip error', e)
@@ -192,17 +192,17 @@ const onFormation = () => {
 };
 
 const onSaveRequestShip = async () => {
-  console.log("onSaveRequestShip clicked", request);
+  console.log("onSaveRequestShip clicked", requestShip);
 
-  if (!request) return;
+  if (!requestShip) return;
 
-  console.log("RequestShipID:", request.RequestShipID);
+  console.log("RequestShipID:", requestShip.RequestShipID);
 
   const c20 = Number(containers20) || 0;
   const c40 = Number(containers40) || 0;
 
   try {
-    await api.api.requestShipUpdate(request.RequestShipID, {
+    await api.api.requestShipUpdate(requestShip.RequestShipID, {
       containers_20ft_count: c20,
       containers_40ft_count: c40,
       comment: comment || "",
@@ -218,10 +218,10 @@ const onSaveRequestShip = async () => {
 
 
   async function onDeleteRequest() {
-    if (!request) return
+    if (!requestShip) return
 
     try {
-      await api.api.requestShipDelete(request.RequestShipID)
+      await api.api.requestShipDelete(requestShip.RequestShipID)
 
       navigate('/ships')
       window.dispatchEvent(new CustomEvent('lt:basket:refresh'))
@@ -233,16 +233,16 @@ const onSaveRequestShip = async () => {
 
   async function onCalculate(e?: React.FormEvent) {
     e?.preventDefault()
-    if (!request) return
+    if (!requestShip) return
     try {
       const payload = {
         containers_20ft: Number(containers20) || 0,
         containers_40ft: Number(containers40) || 0,
         comment: comment ?? ''
       }
-      await calculateLoadingTime(request.RequestShipID, payload)
+      await calculateLoadingTime(requestShip.RequestShipID, payload)
       // загрузим обновлённую заявку
-      await load(String(request.RequestShipID))
+      await load(String(requestShip.RequestShipID))
       window.dispatchEvent(new CustomEvent('lt:basket:refresh'))
     } catch (err) {
       console.error('calculate error', err)
@@ -262,7 +262,7 @@ const onSaveRequestShip = async () => {
       <div className="request" style={{width:1350, display:'flex', flexDirection:'column', alignItems:'center', gap:30, backgroundColor:'#3A3A3A', borderRadius:5, padding:'33px 120px'}}>
         <h1>Расчёт времени погрузки контейнеров</h1>
 
-        { !request ? (
+        { !requestShip ? (
           <div className="empty-message">
             <p>Заявка не найдена. Добавьте контейнеровоз для расчета.</p>
           </div>
@@ -329,8 +329,8 @@ const onSaveRequestShip = async () => {
                 <div className="card-header_request_busket__card__action">Действие</div>
               </div>
               
-              {request.Ships && request.Ships.length > 0 ? (
-                request.Ships.map((s) => (
+              {requestShip.Ships && requestShip.Ships.length > 0 ? (
+                requestShip.Ships.map((s) => (
                   <div key={s.Ship.ShipID} className="request__card_table" >
                     <div className="card-table_request__card__title">{s.Ship.Name}</div>
 
