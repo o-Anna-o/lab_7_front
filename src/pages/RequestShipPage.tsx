@@ -193,6 +193,30 @@ const onFormation = () => {
   );
 };
 
+const onSaveRequestShip = async () => {
+  console.log("onSaveRequestShip clicked", request);
+
+  if (!request) return;
+
+  console.log("RequestShipID:", request.RequestShipID);
+
+  const c20 = Number(containers20) || 0;
+  const c40 = Number(containers40) || 0;
+
+  try {
+    await api.api.requestShipUpdate(request.RequestShipID, {
+      containers_20ft_count: c20,
+      containers_40ft_count: c40,
+      comment: comment || "",
+    });
+
+    alert("Заявка сохранена");
+    window.dispatchEvent(new CustomEvent("lt:basket:refresh"));
+  } catch (e) {
+    console.error("save request error", e);
+    alert("Ошибка сохранения заявки");
+  }
+};
 
 
   async function onDeleteRequest() {
@@ -423,6 +447,14 @@ const onFormation = () => {
                   disabled={loadingFormation}
                 >
                   {loadingFormation ? "Формируется…" : "Сформировать"}
+              </button>
+
+              <button
+                type="button"
+                className="ship-card__btn beige-btn btn"
+                onClick={onSaveRequestShip}
+              >
+                Сохранить
               </button>
 
               <button type="button" className="ship-card__btn beige-btn btn" onClick={onDeleteRequest} style={{marginLeft:10}}>

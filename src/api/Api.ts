@@ -281,6 +281,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/basket`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -321,6 +322,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}`,
         method: "PUT",
+        secure: true,
         body: request,
         type: ContentType.Json,
         format: "json",
@@ -339,6 +341,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}`,
         method: "DELETE",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -362,6 +365,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}/completion`,
         method: "POST",
+        secure: true,
         body: data,
         type: ContentType.FormData,
         format: "json",
@@ -380,6 +384,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}/formation`,
         method: "PUT",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -403,6 +408,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}/ships/${shipId}`,
         method: "PUT",
+        secure: true,
         body: request,
         type: ContentType.Json,
         format: "json",
@@ -425,6 +431,7 @@ export class Api<
       this.request<object, object>({
         path: `/api/request_ship/${id}/ships/${shipId}`,
         method: "DELETE",
+        secure: true,
         format: "json",
         ...params,
       }),
