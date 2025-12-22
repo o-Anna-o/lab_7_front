@@ -193,10 +193,27 @@ export async function updateShipCountInRequest(requestId: number | string, shipI
 
 export async function completeRequestShip(
   requestId: number,
-  action: "complete" | "reject"
+  action: "complete" | "reject" | "update",
+  updateData?: { comment?: string; containers_20ft_count?: number; containers_40ft_count?: number; status?: string }
 ) {
   const token = getToken();
   if (!token) throw new Error("No auth token");
+
+  // Если действие - обновление, используем другой endpoint
+  if (action === "update" && updateData) {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    };
+    
+    const res = await axios.put(
+      `${API_BASE}/request_ship/${requestId}`,
+      updateData,
+      { headers, withCredentials: true }
+    );
+    
+    return res.data;
+  }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/x-www-form-urlencoded",

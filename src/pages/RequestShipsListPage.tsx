@@ -1,21 +1,19 @@
 // src/pages/RequestShipsListPage.tsx
 import React, { useEffect, useState } from 'react'
-import { api } from '../api'
-import { DsRequestShip } from '../api/Api'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { getToken } from '../auth'
 import '../../resources/request_ship_style.css'
 import { completeRequestShip } from '../apii'
+import { useRequestShipsPolling } from '../hooks/useRequestShipsPolling'
+import { DsRequestShip } from '../api/Api'
 
 // Компонент для отображения списка заявок пользователя
 export default function RequestShipsListPage() {
-  // Состояния для хранения данных заявок, состояния загрузки и ошибок
-  const [requests, setRequests] = useState<DsRequestShip[]>([])
+  // Используем хук для short polling
+  const { requests, loading, error, userRole, refetch } = useRequestShipsPolling(5000); // 5 секунд
   const [filteredRequests, setFilteredRequests] = useState<DsRequestShip[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [notification, setNotification] = useState<{message: string, type: string} | null>(null);
   const navigate = useNavigate()
 
@@ -24,7 +22,6 @@ export default function RequestShipsListPage() {
   const [creationDateFilter, setCreationDateFilter] = useState(new Date().toISOString().split('T')[0])
   const [formationDateFilter, setFormationDateFilter] = useState('')
   const [userFilter, setUserFilter] = useState('') // Новый фильтр по создателю
-  const [userRole, setUserRole] = useState<string | null>(null)
   const [userOptions, setUserOptions] = useState<string[]>([]) // Список логинов пользователей
 
   // Проверка авторизации при монтировании компонента
@@ -33,92 +30,17 @@ export default function RequestShipsListPage() {
     if (!token) {
       // Если токен отсутствует, перенаправляем на страницу входа
       navigate('/login');
-      return;
     }
-    
-    // Установка токена в заголовки API для авторизованных запросов
-    api.instance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    
   }, [navigate]);
 
-  // Эффект для загрузки списка заявок пользователя
+  // Обновление списка пользователей при изменении заявок
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        // Проверяем токен перед запросами
-        const token = getToken();
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-        
-        // Получаем данные профиля текущего пользователя
-        const userProfileResponse = await api.api.usersProfileList()
-
-        const role =
-          userProfileResponse.data.role ||
-          (userProfileResponse.data as any).Role ||
-          (userProfileResponse.data as any).role_name
-
-        setUserRole(role)
-        
-        // Получаем все заявки через кодогенерацию API
-        const response = await api.api.requestShipList()
-        
-        // Для оператора порта отображаем все заявки, для других пользователей - только свои
-        let userRequests = [];
-        if (role === "port_operator") {
-          // Для оператора порта отображаем все заявки
-          userRequests = response.data;
-        } else {
-          // Для других пользователей фильтруем по текущему пользователю
-          userRequests = response.data.filter(request => {
-            // Нормализация названий полей для заявки
-            const userId = request.userID || (request as any).UserID || (request as any).user_id || (request as any).userId;
-            
-            // Проверяем правильное поле для userID в данных профиля (нормализация названий)
-            const profileUserId = userProfileResponse.data.userID ||
-                                  (userProfileResponse.data as any).UserID ||
-                                  (userProfileResponse.data as any).UserId
-            
-            // Возвращаем только заявки текущего пользователя
-            return userId === profileUserId;
-          });
-        }
-        
-        setRequests(userRequests)
-        // Фильтруем заявки при загрузке - не отображаем черновики
-        const filteredUserRequests = userRequests.filter(request => {
-          const status = request.status || (request as any).Status || 'Не указан';
-          return !isDraft(status) && !isDeleted(status) && status.toLowerCase() !== 'черновик';
-        });
-        
-        // Получаем список уникальных ID пользователей из нe удаленных заявок
-        const uniqueUserIds = Array.from(new Set(filteredUserRequests
-          .filter(request => request.user?.userID)
-          .map(request => request.user!.userID!.toString())));
-        setUserOptions(uniqueUserIds);
-        
-        setFilteredRequests(filteredUserRequests)
-        setLoading(false)
-      } catch (err: any) {
-        // Если ошибка авторизации, перенаправляем на страницу входа
-        if (err?.response?.status === 401) {
-          navigate('/login');
-          return;
-        }
-        
-        setError(err?.response?.data?.detail || err?.message || 'Ошибка загрузки заявок')
-        setLoading(false)
-      }
-    }
-
-    // Проверяем токен перед загрузкой заявок
-    const token = getToken();
-    if (token) {
-      fetchRequests();
-    }
-  }, [navigate]);
+    // Получаем список уникальных ID пользователей из нe удаленных заявок
+    const uniqueUserIds = Array.from(new Set(requests
+      .filter(request => request.user?.userID)
+      .map(request => request.user!.userID!.toString())));
+    setUserOptions(uniqueUserIds);
+  }, [requests]);
 
   // Функция для показа уведомления
   const showNotification = (message: string, type: string = 'success') => {
@@ -147,11 +69,6 @@ export default function RequestShipsListPage() {
     return normalizedStatus === 'удалена' || normalizedStatus === 'deleted';
   };
 
-  // Функция для обработки нажатия на кнопку "Открыть"
-  const handleOpenRequest = (requestId: number) => {
-    navigate(`/request_ship/${requestId}`);
-  };
-
   // Функция для применения фильтров
   const applyFilters = () => {
     let result = [...requests];
@@ -169,14 +86,6 @@ export default function RequestShipsListPage() {
       const status = request.status || (request as any).Status || 'Не указан';
       return !isDraft(status) && !isDeleted(status);
     });
-
-    // Фильтр по статусу
-    if (statusFilter) {
-      result = result.filter(request => {
-        const status = request.status || (request as any).Status || '';
-        return status.toLowerCase().includes(statusFilter.toLowerCase());
-      });
-    }
 
     // Фильтр по дате создания
     if (creationDateFilter) {
@@ -332,7 +241,7 @@ export default function RequestShipsListPage() {
                                 console.log("Completing request:", requestId, "action: complete");
                                 await completeRequestShip(requestId, "complete");
                                 showNotification("Заявка завершена, расчёт запущен");
-                                navigate(0); // перезагрузка списка
+                                refetch(); // обновляем список через polling
                               } catch (e: any) {
                                 console.error("Ошибка завершения заявки:", e);
                                 console.error("Ошибка завершения заявки: " + (e.message || e));
@@ -349,7 +258,7 @@ export default function RequestShipsListPage() {
                                 console.log("Rejecting request:", requestId, "action: reject");
                                 await completeRequestShip(requestId, "reject");
                                 showNotification("Заявка отклонена");
-                                navigate(0);
+                                refetch(); // обновляем список через polling
                               } catch (e: any) {
                                 console.error("Ошибка отклонения заявки:", e);
                                 console.error("Ошибка отклонения заявки: " + (e.message || e));
@@ -376,10 +285,10 @@ export default function RequestShipsListPage() {
                                 };
                                 
                                 // Отправляем запрос на обновление заявки
-                                await api.api.requestShipUpdate(requestId, updateData);
+                                await completeRequestShip(requestId, "update", updateData);
                                 
                                 showNotification("Статус заявки обновлён");
-                                navigate(0); // перезагрузка списка
+                                refetch(); // обновляем список через polling
                               } catch (e: any) {
                                 console.error("Ошибка обновления статуса заявки:", e);
                                 console.error("Ошибка обновления статуса заявки: " + (e.message || e));
