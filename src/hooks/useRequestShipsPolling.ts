@@ -120,35 +120,17 @@ export const useRequestShipsPolling = (interval: number = 5000) => {
     
     // Запуск polling
     const pollingInterval = setInterval(() => {
+      console.log('Polling for updated request ships...');
       fetchRequests((newRequests) => {
-        // Обновляем только если данные изменились
-        setRequests(prevRequests => {
-          // Сравниваем по длине и по ID/status каждой заявки
-          if (prevRequests.length !== newRequests.length) {
-            return newRequests;
-          }
-          
-          // Проверяем каждую заявку на изменения
-          for (let i = 0; i < prevRequests.length; i++) {
-            const prev = prevRequests[i];
-            const current = newRequests[i];
-            
-            if (prev.requestShipID !== current.requestShipID || 
-                (prev.status || '') !== (current.status || '') ||
-                (prev.formationDate || '') !== (current.formationDate || '')) {
-              // Найдены изменения
-              return newRequests;
-            }
-          }
-          
-          // Изменений нет, возвращаем предыдущее состояние
-          return prevRequests;
-        });
+        // Всегда обновляем состояние, чтобы отразить актуальные данные
+        console.log('Received updated requests from polling:', newRequests);
+        setRequests(newRequests);
       });
     }, interval);
     
     // Очистка при размонтировании
     return () => {
+      console.log('Clearing polling interval');
       clearInterval(pollingInterval);
     };
   }, [fetchRequests, interval]);
