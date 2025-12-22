@@ -203,14 +203,15 @@ export async function completeRequestShip(
     Authorization: "Bearer " + token,
   };
 
-  const body = new URLSearchParams();
-  body.append("action", action);
-
+  // Для завершения и отклонения используем PUT запрос к /completion как в бэкенде
+  const formData = new FormData();
+  formData.append("action", action);
+  
   const res = await axios.put(
     `${API_BASE}/request_ship/${requestId}/completion`,
-    body,
+    formData,
     { headers, withCredentials: true }
   );
-
+  
   return res.data;
 }

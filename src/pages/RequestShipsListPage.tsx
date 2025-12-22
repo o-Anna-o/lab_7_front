@@ -16,6 +16,7 @@ export default function RequestShipsListPage() {
   const [filteredRequests, setFilteredRequests] = useState<DsRequestShip[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [notification, setNotification] = useState<{message: string, type: string} | null>(null);
   const navigate = useNavigate()
 
   // Состояния для фильтров
@@ -24,6 +25,7 @@ export default function RequestShipsListPage() {
   const [formationDateFilter, setFormationDateFilter] = useState('')
   const [userFilter, setUserFilter] = useState('') // Новый фильтр по создателю
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [userOptions, setUserOptions] = useState<string[]>([]) // Список логинов пользователей
 
   // Проверка авторизации при монтировании компонента
   useEffect(() => {
@@ -90,6 +92,13 @@ export default function RequestShipsListPage() {
           const status = request.status || (request as any).Status || 'Не указан';
           return !isDraft(status) && !isDeleted(status) && status.toLowerCase() !== 'черновик';
         });
+        
+        // Получаем список уникальных ID пользователей из нe удаленных заявок
+        const uniqueUserIds = Array.from(new Set(filteredUserRequests
+          .filter(request => request.user?.userID)
+          .map(request => request.user!.userID!.toString())));
+        setUserOptions(uniqueUserIds);
+        
         setFilteredRequests(filteredUserRequests)
         setLoading(false)
       } catch (err: any) {
@@ -109,7 +118,15 @@ export default function RequestShipsListPage() {
     if (token) {
       fetchRequests();
     }
-  }, [navigate])
+  }, [navigate]);
+
+  // Функция для показа уведомления
+  const showNotification = (message: string, type: string = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000); // Скрыть уведомление через 3 секунды
+  };
 
   // Эффект для применения фильтров по умолчанию при загрузке
   useEffect(() => {
@@ -183,11 +200,11 @@ export default function RequestShipsListPage() {
       });
     }
 
-    // Фильтр по создателю (логину)
+    // Фильтр по создателю (ID пользователя)
     if (userFilter) {
       result = result.filter(request => {
-        const userLogin = request.user?.login || (request as any).User?.login || '';
-        return userLogin.toLowerCase().includes(userFilter.toLowerCase());
+        const userId = request.user?.userID?.toString() || (request as any).User?.userID?.toString() || '';
+        return userId.includes(userFilter);
       });
     }
 
@@ -240,12 +257,15 @@ export default function RequestShipsListPage() {
           {userRole === "port_operator" && (
             <div className="filter-item">
               <label>Создатель:</label>
-              <input
-                type="text"
+              <select
                 value={userFilter}
                 onChange={(e) => setUserFilter(e.target.value)}
-                placeholder="Логин создателя"
-              />
+              >
+                <option value="">Все создатели</option>
+                {userOptions.map(id => (
+                  <option key={id} value={id}>{id}</option>
+                ))}
+              </select>
             </div>
           )}
           <button className="show_btn btn btn-active" onClick={applyFilters}>Показать</button>
@@ -279,7 +299,7 @@ export default function RequestShipsListPage() {
               const formationDate = request.formationDate || (request as any).FormationDate || (request as any).completed_at || 'Не завершена';
               const containers20 = request.containers20ftCount || (request as any).Containers20ftCount || (request as any).containers_20ft_count || (request as any).containers20 || 0;
               const containers40 = request.containers40ftCount || (request as any).Containers40ftCount || (request as any).containers_40ft_count || (request as any).containers40 || 0;
-              const resultTime = request.loadingTime || (request as any).LoadingTime || (request as any).loading_time || 0;
+              const resultTime = (status.toLowerCase() === "сформирован") ? 0 : (request.loadingTime || (request as any).LoadingTime || (request as any).loading_time || 0);
                            
               // Проверяем, является ли заявка черновиком
               const isRequestDraft = isDraft(status);
@@ -311,11 +331,11 @@ export default function RequestShipsListPage() {
                               try {
                                 console.log("Completing request:", requestId, "action: complete");
                                 await completeRequestShip(requestId, "complete");
-                                alert("Заявка завершена, расчёт запущен");
+                                showNotification("Заявка завершена, расчёт запущен");
                                 navigate(0); // перезагрузка списка
                               } catch (e: any) {
                                 console.error("Ошибка завершения заявки:", e);
-                                alert("Ошибка завершения заявки: " + (e.message || e));
+                                console.error("Ошибка завершения заявки: " + (e.message || e));
                               }
                             }}
                           >
@@ -328,11 +348,11 @@ export default function RequestShipsListPage() {
                               try {
                                 console.log("Rejecting request:", requestId, "action: reject");
                                 await completeRequestShip(requestId, "reject");
-                                alert("Заявка отклонена");
+                                showNotification("Заявка отклонена");
                                 navigate(0);
                               } catch (e: any) {
                                 console.error("Ошибка отклонения заявки:", e);
-                                alert("Ошибка отклонения заявки: " + (e.message || e));
+                                console.error("Ошибка отклонения заявки: " + (e.message || e));
                               }
                             }}
                           >
@@ -351,17 +371,18 @@ export default function RequestShipsListPage() {
                                 const updateData = {
                                   comment: request.comment || "",
                                   containers_20ft_count: request.containers20ftCount || 0,
-                                  containers_40ft_count: request.containers40ftCount || 0
+                                  containers_40ft_count: request.containers40ftCount || 0,
+                                  status: newStatus
                                 };
                                 
                                 // Отправляем запрос на обновление заявки
                                 await api.api.requestShipUpdate(requestId, updateData);
                                 
-                                alert("Статус заявки обновлён");
+                                showNotification("Статус заявки обновлён");
                                 navigate(0); // перезагрузка списка
                               } catch (e: any) {
                                 console.error("Ошибка обновления статуса заявки:", e);
-                                alert("Ошибка обновления статуса заявки: " + (e.message || e));
+                                console.error("Ошибка обновления статуса заявки: " + (e.message || e));
                               }
                             }
                           }}

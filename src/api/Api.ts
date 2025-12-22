@@ -352,7 +352,7 @@ export class Api<
      * @tags request_ships
      * @name RequestShipCompletionCreate
      * @summary Завершить или отклонить заявку (модератор)
-     * @request POST:/api/request_ship/{id}/completion
+     * @request PUT:/api/request_ship/{id}/completion
      */
     requestShipCompletionCreate: (
       id: number,
@@ -364,7 +364,7 @@ export class Api<
     ) =>
       this.request<object, object>({
         path: `/api/request_ship/${id}/completion`,
-        method: "POST",
+        method: "PUT",
         secure: true,
         body: data,
         type: ContentType.FormData,
