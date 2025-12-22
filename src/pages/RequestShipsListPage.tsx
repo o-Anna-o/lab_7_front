@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { getToken } from '../auth'
 import '../../resources/request_ship_style.css'
+import { completeRequestShip } from '../apii'
 
 // Компонент для отображения списка заявок пользователя
 export default function RequestShipsListPage() {
@@ -21,6 +22,7 @@ export default function RequestShipsListPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [creationDateFilter, setCreationDateFilter] = useState(new Date().toISOString().split('T')[0])
   const [formationDateFilter, setFormationDateFilter] = useState('')
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   // Проверка авторизации при монтировании компонента
   useEffect(() => {
@@ -49,6 +51,13 @@ export default function RequestShipsListPage() {
         
         // Получаем данные профиля текущего пользователя
         const userProfileResponse = await api.api.usersProfileList()
+
+        const role =
+          userProfileResponse.data.role ||
+          (userProfileResponse.data as any).Role ||
+          (userProfileResponse.data as any).role_name
+
+        setUserRole(role)
         
         // Получаем все заявки через кодогенерацию API
         const response = await api.api.requestShipList()
@@ -244,21 +253,72 @@ export default function RequestShipsListPage() {
                            
               // Проверяем, является ли заявка черновиком
               const isRequestDraft = isDraft(status);
+
+              {/* Кнопки для оператора порта */}
+              {userRole === "port_operator" && status.toLowerCase() === "сформирован" && (
+                <div
+                  className="request__card__actions"
+                  style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}
+                >
+                  <button
+                    className="btn btn-success"
+                    onClick={async () => {
+                      try {
+                        await completeRequestShip(requestId, "complete");
+                        alert("Заявка завершена, расчёт запущен");
+                        navigate(0); // перезагрузка списка
+                      } catch (e) {
+                        alert("Ошибка завершения заявки");
+                      }
+                    }}
+                  >
+                    Завершить
+                  </button>
+
+                  <button
+                    className="btn btn-danger"
+                    onClick={async () => {
+                      try {
+                        await completeRequestShip(requestId, "reject");
+                        alert("Заявка отклонена");
+                        navigate(0);
+                      } catch (e) {
+                        alert("Ошибка отклонения заявки");
+                      }
+                    }}
+                  >
+                    Отклонить
+                  </button>
+                </div>
+              )}
+
               
               return (
                 <div className="request__card" key={requestId}>
-                  <div className="request__card__title">{requestId}</div>
-                  <div className="request__card__20ft">{containers20}</div>
-                  <div className="request__card__40ft">{containers40}</div>
-                  <div className="request__card__status">{status}</div>
-                  <div className="request__card__creation-date">
-                    {creationDate ? new Date(creationDate).toLocaleDateString('ru-RU') : 'Не указана'}
-                  </div>
-                  <div className="request__card__formation-date">
-                    {formationDate ? new Date(formationDate).toLocaleDateString('ru-RU') : 'нет'}
-                  </div>
-                  <div className="request__card__result">{resultTime}</div>
+                <div className="request__card__title">{requestId}</div>
+                <div className="request__card__20ft">{containers20}</div>
+                <div className="request__card__40ft">{containers40}</div>
+                <div className="request__card__status">{status}</div>
+                <div className="request__card__creation-date">
+                  {creationDate ? new Date(creationDate).toLocaleDateString('ru-RU') : 'Не указана'}
                 </div>
+                <div className="request__card__formation-date">
+                  {formationDate ? new Date(formationDate).toLocaleDateString('ru-RU') : 'нет'}
+                </div>
+                <div className="request__card__result">{resultTime}</div>
+
+                
+                {userRole === "port_operator" && status.toLowerCase() === "сформирован" && (
+                  <div
+                    className="request__card__actions"
+                    style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}
+                  >
+                    <button className="btn btn-success">Завершить</button>
+                    <button className="btn btn-danger">Отклонить</button>
+                  </div>
+                )}
+              </div>
+
               );
             })}
           </div>

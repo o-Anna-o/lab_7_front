@@ -133,7 +133,7 @@ export async function deleteRequestShip(requestId: number | string) {
   return res.data
 }
 
-// рассчитать время погрузки (POST)
+// рассчитать время погрузки (PUT)
 export async function calculateLoadingTime(requestId: number | string, payload: { containers_20ft?: number, containers_40ft?: number, comment?: string }) {
   const token = getToken()
   const headers: Record<string,string> = {'Content-Type': 'application/json'}
@@ -189,4 +189,28 @@ export async function updateShipCountInRequest(requestId: number | string, shipI
     }
     throw error;
   }
+}
+
+export async function completeRequestShip(
+  requestId: number,
+  action: "complete" | "reject"
+) {
+  const token = getToken();
+  if (!token) throw new Error("No auth token");
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    Authorization: "Bearer " + token,
+  };
+
+  const body = new URLSearchParams();
+  body.append("action", action);
+
+  const res = await axios.put(
+    `${API_BASE}/api/request_ship/${requestId}/completion`,
+    body,
+    { headers, withCredentials: true }
+  );
+
+  return res.data;
 }

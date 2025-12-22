@@ -132,7 +132,7 @@ export async function deleteRequestShip(requestId: number | string) {
   return res.data
 }
 
-// рассчитать время погрузки (POST)
+// рассчитать время погрузки (PUT)
 export async function calculateLoadingTime(requestId: number | string, payload: { containers_20ft?: number, containers_40ft?: number, comment?: string }) {
   const token = getToken()
   const headers: Record<string,string> = {'Content-Type': 'application/json'}
