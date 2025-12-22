@@ -369,3 +369,69 @@ input, select {
 error-message_h1 {
     text-align: center;
 }
+
+/* Стили для таблицы оператора порта */
+.request__card.port-operator,
+.request__card-header.port-operator {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header_request__card__title.port-operator,
+.request__card__title.port-operator {
+    width: 80px;
+    text-align: left;
+}
+
+.card-header_request__card__20ft.port-operator,
+.request__card__20ft.port-operator {
+    width: 100px;
+    text-align: center;
+}
+
+.card-header_request__card__40ft.port-operator,
+.request__card__40ft.port-operator {
+    width: 100px;
+    text-align: center;
+}
+
+.card-header_request__card__status.port-operator,
+.request__card__status.port-operator {
+    width: 150px;
+    text-align: center;
+}
+
+.card-header_request__card__creation-date.port-operator,
+.request__card__creation-date.port-operator {
+    width: 160px;
+    text-align: center;
+}
+
+.card-header_request__card__formation-date.port-operator,
+.request__card__formation-date.port-operator {
+    width: 160px;
+    text-align: center;
+}
+
+.card-header_request__card__result.port-operator,
+.request__card__result.port-operator {
+    width: 100px;
+    text-align: center;
+}
+
+.card-header_request__card__actions.port-operator,
+.request__card__actions.port-operator {
+    width: 200px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Стили для пустой ячейки действий */
+.request__card__actions.port-operator .empty-actions {
+    width: 200px;
+    height: 40px; /* Высота кнопок */
+}

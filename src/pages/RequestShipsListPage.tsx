@@ -238,16 +238,16 @@ export default function RequestShipsListPage() {
           
           <div className="request__cards">
             {/* Заголовок таблицы */}
-            <div className="request__card request__card-header">
-              <div className=" card-header_request__card__title">№</div>
-              <div className=" card-header_request__card__20ft">20 футов</div>
-              <div className=" card-header_request__card__40ft">40 футов</div>
-              <div className=" card-header_request__card__status">Статус</div>
-              <div className=" card-header_request__card__creation-date">Дата создания</div>
-              <div className=" card-header_request__card__formation-date">Дата оформления</div>
-              <div className=" card-header_request__card__result">Результат</div>
+            <div className={`request__card request__card-header ${userRole === "port_operator" ? "port-operator" : ""}`}>
+              <div className={`card-header_request__card__title ${userRole === "port_operator" ? "port-operator" : ""}`}>№</div>
+              <div className={`card-header_request__card__20ft ${userRole === "port_operator" ? "port-operator" : ""}`}>20 футов</div>
+              <div className={`card-header_request__card__40ft ${userRole === "port_operator" ? "port-operator" : ""}`}>40 футов</div>
+              <div className={`card-header_request__card__status ${userRole === "port_operator" ? "port-operator" : ""}`}>Статус</div>
+              <div className={`card-header_request__card__creation-date ${userRole === "port_operator" ? "port-operator" : ""}`}>Дата создания</div>
+              <div className={`card-header_request__card__formation-date ${userRole === "port_operator" ? "port-operator" : ""}`}>Дата оформления</div>
+              <div className={`card-header_request__card__result ${userRole === "port_operator" ? "port-operator" : ""}`}>Результат</div>
               {userRole === "port_operator" && (
-                <div className=" card-header_request__card__actions">Действие</div>
+                <div className={`card-header_request__card__actions ${userRole === "port_operator" ? "port-operator" : ""}`}>Действие</div>
               )}
             </div>
             
@@ -266,22 +266,22 @@ export default function RequestShipsListPage() {
 
               
               return (
-                <div className="request__card" key={requestId}>
-                <div className="request__card__title">{requestId}</div>
-                <div className="request__card__20ft">{containers20}</div>
-                <div className="request__card__40ft">{containers40}</div>
-                <div className="request__card__status">{status}</div>
-                <div className="request__card__creation-date">
+                <div className={`request__card ${userRole === "port_operator" ? "port-operator" : ""}`} key={requestId}>
+                <div className={`request__card__title ${userRole === "port_operator" ? "port-operator" : ""}`}>{requestId}</div>
+                <div className={`request__card__20ft ${userRole === "port_operator" ? "port-operator" : ""}`}>{containers20}</div>
+                <div className={`request__card__40ft ${userRole === "port_operator" ? "port-operator" : ""}`}>{containers40}</div>
+                <div className={`request__card__status ${userRole === "port_operator" ? "port-operator" : ""}`}>{status}</div>
+                <div className={`request__card__creation-date ${userRole === "port_operator" ? "port-operator" : ""}`}>
                   {creationDate ? new Date(creationDate).toLocaleDateString('ru-RU') : 'Не указана'}
                 </div>
-                <div className="request__card__formation-date">
+                <div className={`request__card__formation-date ${userRole === "port_operator" ? "port-operator" : ""}`}>
                   {formationDate ? new Date(formationDate).toLocaleDateString('ru-RU') : 'нет'}
                 </div>
-                <div className="request__card__result">{resultTime}</div>
+                <div className={`request__card__result ${userRole === "port_operator" ? "port-operator" : ""}`}>{resultTime}</div>
 
                 
                 {userRole === "port_operator" && (
-                  <div className="request__card__actions">
+                  <div className={`request__card__actions ${userRole === "port_operator" ? "port-operator" : ""}`}>
                     {status.toLowerCase() === "сформирован" ? (
                       <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
                         <button
@@ -319,7 +319,7 @@ export default function RequestShipsListPage() {
                         </button>
                       </div>
                     ) : (
-                      <div></div> // Пустая ячейка для других статусов
+                      <div className="empty-actions"></div> // Пустая ячейка для других статусов
                     )}
                   </div>
                 )}
