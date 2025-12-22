@@ -207,7 +207,7 @@ export async function completeRequestShip(
   body.append("action", action);
 
   const res = await axios.put(
-    `${API_BASE}/api/request_ship/${requestId}/completion`,
+    `${API_BASE}/request_ship/${requestId}/completion`,
     body,
     { headers, withCredentials: true }
   );

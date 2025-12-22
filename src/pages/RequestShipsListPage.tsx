@@ -62,19 +62,26 @@ export default function RequestShipsListPage() {
         // Получаем все заявки через кодогенерацию API
         const response = await api.api.requestShipList()
         
-        // Фильтруем заявки по текущему пользователю
-        const userRequests = response.data.filter(request => {
-          // Нормализация названий полей для заявки
-          const userId = request.userID || (request as any).UserID || (request as any).user_id || (request as any).userId;
-          
-          // Проверяем правильное поле для userID в данных профиля (нормализация названий)
-          const profileUserId = userProfileResponse.data.userID ||
-                                (userProfileResponse.data as any).UserID ||
-                                (userProfileResponse.data as any).UserId
-          
-          // Возвращаем только заявки текущего пользователя
-          return userId === profileUserId;
-        })
+        // Для оператора порта отображаем все заявки, для других пользователей - только свои
+        let userRequests = [];
+        if (role === "port_operator") {
+          // Для оператора порта отображаем все заявки
+          userRequests = response.data;
+        } else {
+          // Для других пользователей фильтруем по текущему пользователю
+          userRequests = response.data.filter(request => {
+            // Нормализация названий полей для заявки
+            const userId = request.userID || (request as any).UserID || (request as any).user_id || (request as any).userId;
+            
+            // Проверяем правильное поле для userID в данных профиля (нормализация названий)
+            const profileUserId = userProfileResponse.data.userID ||
+                                  (userProfileResponse.data as any).UserID ||
+                                  (userProfileResponse.data as any).UserId
+            
+            // Возвращаем только заявки текущего пользователя
+            return userId === profileUserId;
+          });
+        }
         
         setRequests(userRequests)
         // Фильтруем заявки при загрузке - не отображаем черновики
@@ -189,7 +196,7 @@ export default function RequestShipsListPage() {
       <Breadcrumbs />
       
       <div className="request">
-        <h1>Мои заявки</h1>
+        <h1>{userRole === "port_operator" ? "Все заявки" : "Мои заявки"}</h1>
         
         {/* Фильтры */}
         <div className="request__filters">
@@ -239,6 +246,9 @@ export default function RequestShipsListPage() {
               <div className=" card-header_request__card__creation-date">Дата создания</div>
               <div className=" card-header_request__card__formation-date">Дата оформления</div>
               <div className=" card-header_request__card__result">Результат</div>
+              {userRole === "port_operator" && (
+                <div className=" card-header_request__card__actions">Действие</div>
+              )}
             </div>
             
             {filteredRequests.map((request) => {
@@ -253,44 +263,6 @@ export default function RequestShipsListPage() {
                            
               // Проверяем, является ли заявка черновиком
               const isRequestDraft = isDraft(status);
-
-              {/* Кнопки для оператора порта */}
-              {userRole === "port_operator" && status.toLowerCase() === "сформирован" && (
-                <div
-                  className="request__card__actions"
-                  style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}
-                >
-                  <button
-                    className="btn btn-success"
-                    onClick={async () => {
-                      try {
-                        await completeRequestShip(requestId, "complete");
-                        alert("Заявка завершена, расчёт запущен");
-                        navigate(0); // перезагрузка списка
-                      } catch (e) {
-                        alert("Ошибка завершения заявки");
-                      }
-                    }}
-                  >
-                    Завершить
-                  </button>
-
-                  <button
-                    className="btn btn-danger"
-                    onClick={async () => {
-                      try {
-                        await completeRequestShip(requestId, "reject");
-                        alert("Заявка отклонена");
-                        navigate(0);
-                      } catch (e) {
-                        alert("Ошибка отклонения заявки");
-                      }
-                    }}
-                  >
-                    Отклонить
-                  </button>
-                </div>
-              )}
 
               
               return (
@@ -308,17 +280,50 @@ export default function RequestShipsListPage() {
                 <div className="request__card__result">{resultTime}</div>
 
                 
-                {userRole === "port_operator" && status.toLowerCase() === "сформирован" && (
-                  <div
-                    className="request__card__actions"
-                    style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}
-                  >
-                    <button className="btn btn-success">Завершить</button>
-                    <button className="btn btn-danger">Отклонить</button>
+                {userRole === "port_operator" && (
+                  <div className="request__card__actions">
+                    {status.toLowerCase() === "сформирован" ? (
+                      <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                        <button
+                          className="btn btn-success"
+                          onClick={async () => {
+                            try {
+                              console.log("Completing request:", requestId, "action: complete");
+                              await completeRequestShip(requestId, "complete");
+                              alert("Заявка завершена, расчёт запущен");
+                              navigate(0); // перезагрузка списка
+                            } catch (e: any) {
+                              console.error("Ошибка завершения заявки:", e);
+                              alert("Ошибка завершения заявки: " + (e.message || e));
+                            }
+                          }}
+                        >
+                          Завершить
+                        </button>
+
+                        <button
+                          className="btn btn-danger"
+                          onClick={async () => {
+                            try {
+                              console.log("Rejecting request:", requestId, "action: reject");
+                              await completeRequestShip(requestId, "reject");
+                              alert("Заявка отклонена");
+                              navigate(0);
+                            } catch (e: any) {
+                              console.error("Ошибка отклонения заявки:", e);
+                              alert("Ошибка отклонения заявки: " + (e.message || e));
+                            }
+                          }}
+                        >
+                          Отклонить
+                        </button>
+                      </div>
+                    ) : (
+                      <div></div> // Пустая ячейка для других статусов
+                    )}
                   </div>
                 )}
               </div>
-
               );
             })}
           </div>
