@@ -19,8 +19,8 @@ export default function Breadcrumbs() {
     }
     
     switch (part) {
-      case 'ships': return 'Корабли'
-      case 'ship': return 'Корабли'
+      case 'ships': return 'Контейнеровозы'
+      case 'ship': return 'Контейнеровозы'
       case 'request_ship': return 'Заявки'
       case 'login': return 'Вход'
       case 'register': return 'Регистрация'

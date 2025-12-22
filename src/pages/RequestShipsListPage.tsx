@@ -19,8 +19,8 @@ export default function RequestShipsListPage() {
 
   // Состояния для фильтров
   const [statusFilter, setStatusFilter] = useState('')
-  const [creationDateFilter, setCreationDateFilter] = useState(new Date().toISOString().split('T')[0])
-  const [formationDateFilter, setFormationDateFilter] = useState('')
+  const [creationDateFilter, setCreationDateFilter] = useState('')
+  const [formationDateFilter, setFormationDateFilter] = useState(new Date().toISOString().split('T')[0])
   const [userFilter, setUserFilter] = useState('') // Новый фильтр по создателю
   const [userOptions, setUserOptions] = useState<string[]>([]) // Список логинов пользователей
 
@@ -87,26 +87,38 @@ export default function RequestShipsListPage() {
       return !isDraft(status) && !isDeleted(status);
     });
 
-    // Фильтр по дате создания
-    if (creationDateFilter) {
-      result = result.filter(request => {
-        const creationDate = request.creationDate || (request as any).CreationDate || (request as any).created_at;
-        if (!creationDate) return false;
-        const requestDate = new Date(creationDate);
-        const filterDate = new Date(creationDateFilter);
-        return requestDate.toDateString() === filterDate.toDateString();
-      });
-    }
-
-    // Фильтр по дате оформления
-    if (formationDateFilter) {
+    // Если не заданы фильтры по дате создания и статусу, применяем фильтр по дате формирования по умолчанию
+    if (!creationDateFilter && !statusFilter) {
+      const today = new Date().toISOString().split('T')[0];
       result = result.filter(request => {
         const formationDate = request.formationDate || (request as any).FormationDate || (request as any).completed_at;
         if (!formationDate) return false;
         const requestDate = new Date(formationDate);
-        const filterDate = new Date(formationDateFilter);
+        const filterDate = new Date(today);
         return requestDate.toDateString() === filterDate.toDateString();
       });
+    } else {
+      // Фильтр по дате создания
+      if (creationDateFilter) {
+        result = result.filter(request => {
+          const creationDate = request.creationDate || (request as any).CreationDate || (request as any).created_at;
+          if (!creationDate) return false;
+          const requestDate = new Date(creationDate);
+          const filterDate = new Date(creationDateFilter);
+          return requestDate.toDateString() === filterDate.toDateString();
+        });
+      }
+
+      // Фильтр по дате оформления
+      if (formationDateFilter) {
+        result = result.filter(request => {
+          const formationDate = request.formationDate || (request as any).FormationDate || (request as any).completed_at;
+          if (!formationDate) return false;
+          const requestDate = new Date(formationDate);
+          const filterDate = new Date(formationDateFilter);
+          return requestDate.toDateString() === filterDate.toDateString();
+        });
+      }
     }
 
     // Фильтр по создателю (ID пользователя)
