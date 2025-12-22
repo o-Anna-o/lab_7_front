@@ -22,6 +22,7 @@ export default function RequestShipsListPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [creationDateFilter, setCreationDateFilter] = useState(new Date().toISOString().split('T')[0])
   const [formationDateFilter, setFormationDateFilter] = useState('')
+  const [userFilter, setUserFilter] = useState('') // Новый фильтр по создателю
   const [userRole, setUserRole] = useState<string | null>(null)
 
   // Проверка авторизации при монтировании компонента
@@ -182,6 +183,14 @@ export default function RequestShipsListPage() {
       });
     }
 
+    // Фильтр по создателю (логину)
+    if (userFilter) {
+      result = result.filter(request => {
+        const userLogin = request.user?.login || (request as any).User?.login || '';
+        return userLogin.toLowerCase().includes(userFilter.toLowerCase());
+      });
+    }
+
     setFilteredRequests(result);
   };
 
@@ -228,6 +237,17 @@ export default function RequestShipsListPage() {
               onChange={(e) => setFormationDateFilter(e.target.value)}
             />
           </div>
+          {userRole === "port_operator" && (
+            <div className="filter-item">
+              <label>Создатель:</label>
+              <input
+                type="text"
+                value={userFilter}
+                onChange={(e) => setUserFilter(e.target.value)}
+                placeholder="Логин создателя"
+              />
+            </div>
+          )}
           <button className="show_btn btn btn-active" onClick={applyFilters}>Показать</button>
         </div>
         
@@ -282,45 +302,74 @@ export default function RequestShipsListPage() {
                 
                 {userRole === "port_operator" && (
                   <div className={`request__card__actions ${userRole === "port_operator" ? "port-operator" : ""}`}>
-                    {status.toLowerCase() === "сформирован" ? (
-                      <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                        <button
-                          className="btn btn-success"
-                          onClick={async () => {
-                            try {
-                              console.log("Completing request:", requestId, "action: complete");
-                              await completeRequestShip(requestId, "complete");
-                              alert("Заявка завершена, расчёт запущен");
-                              navigate(0); // перезагрузка списка
-                            } catch (e: any) {
-                              console.error("Ошибка завершения заявки:", e);
-                              alert("Ошибка завершения заявки: " + (e.message || e));
-                            }
-                          }}
-                        >
-                          Завершить
-                        </button>
+                    <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                      {status.toLowerCase() === "сформирован" ? (
+                        <>
+                          <button
+                            className="btn btn-success"
+                            onClick={async () => {
+                              try {
+                                console.log("Completing request:", requestId, "action: complete");
+                                await completeRequestShip(requestId, "complete");
+                                alert("Заявка завершена, расчёт запущен");
+                                navigate(0); // перезагрузка списка
+                              } catch (e: any) {
+                                console.error("Ошибка завершения заявки:", e);
+                                alert("Ошибка завершения заявки: " + (e.message || e));
+                              }
+                            }}
+                          >
+                            Завершить
+                          </button>
 
+                          <button
+                            className="btn btn-danger"
+                            onClick={async () => {
+                              try {
+                                console.log("Rejecting request:", requestId, "action: reject");
+                                await completeRequestShip(requestId, "reject");
+                                alert("Заявка отклонена");
+                                navigate(0);
+                              } catch (e: any) {
+                                console.error("Ошибка отклонения заявки:", e);
+                                alert("Ошибка отклонения заявки: " + (e.message || e));
+                              }
+                            }}
+                          >
+                            Отклонить
+                          </button>
+                        </>
+                      ) : (
                         <button
-                          className="btn btn-danger"
+                          className="btn btn-active"
+                          style={{ width: "150px" }}
                           onClick={async () => {
-                            try {
-                              console.log("Rejecting request:", requestId, "action: reject");
-                              await completeRequestShip(requestId, "reject");
-                              alert("Заявка отклонена");
-                              navigate(0);
-                            } catch (e: any) {
-                              console.error("Ошибка отклонения заявки:", e);
-                              alert("Ошибка отклонения заявки: " + (e.message || e));
+                            const newStatus = prompt("Введите новый статус для заявки:", status);
+                            if (newStatus !== null && newStatus !== status) {
+                              try {
+                                // Создаем объект с текущими значениями полей заявки
+                                const updateData = {
+                                  comment: request.comment || "",
+                                  containers_20ft_count: request.containers20ftCount || 0,
+                                  containers_40ft_count: request.containers40ftCount || 0
+                                };
+                                
+                                // Отправляем запрос на обновление заявки
+                                await api.api.requestShipUpdate(requestId, updateData);
+                                
+                                alert("Статус заявки обновлён");
+                                navigate(0); // перезагрузка списка
+                              } catch (e: any) {
+                                console.error("Ошибка обновления статуса заявки:", e);
+                                alert("Ошибка обновления статуса заявки: " + (e.message || e));
+                              }
                             }
                           }}
                         >
-                          Отклонить
+                          Изменить
                         </button>
-                      </div>
-                    ) : (
-                      <div className="empty-actions"></div> // Пустая ячейка для других статусов
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
