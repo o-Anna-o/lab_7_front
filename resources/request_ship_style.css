@@ -108,8 +108,8 @@ input, select {
 .request__filters {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    /*gap: 20px;*/
+    flex-wrap: wrap;
+    gap: 20px;
     align-items: end;
     margin-bottom: 20px;
     width: 1198px;
@@ -122,6 +122,8 @@ input, select {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    flex: 1 1 calc(25% - 20px); /* 4 колонки с gap=20px */
+    min-width: 200px; /* Минимальная ширина для адаптивности */
 }
 
 .filter-item label {
@@ -135,6 +137,8 @@ input, select {
     border-radius: 5px;
     color: #fff;
     font-size: 22px;
+    width: 100%; /* Занимать всю ширину родителя */
+    box-sizing: border-box; /* Включать padding и border в общую ширину */
 }
 
 .request__cards {

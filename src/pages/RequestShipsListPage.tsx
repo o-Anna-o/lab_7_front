@@ -151,7 +151,11 @@ export default function RequestShipsListPage() {
             <label>Статус:</label>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                // Применяем фильтры сразу при изменении значения
+                setTimeout(() => applyFilters(), 0);
+              }}
             >
               <option value="">Все статусы</option>
               <option value="сформирован">Сформирован</option>
@@ -164,7 +168,11 @@ export default function RequestShipsListPage() {
             <input
               type="date"
               value={creationDateFilter}
-              onChange={(e) => setCreationDateFilter(e.target.value)}
+              onChange={(e) => {
+                setCreationDateFilter(e.target.value);
+                // Применяем фильтры сразу при изменении значения
+                setTimeout(() => applyFilters(), 0);
+              }}
             />
           </div>
           <div className="filter-item">
@@ -172,7 +180,11 @@ export default function RequestShipsListPage() {
             <input
               type="date"
               value={formationDateFilter}
-              onChange={(e) => setFormationDateFilter(e.target.value)}
+              onChange={(e) => {
+                setFormationDateFilter(e.target.value);
+                // Применяем фильтры сразу при изменении значения
+                setTimeout(() => applyFilters(), 0);
+              }}
             />
           </div>
           {userRole === "port_operator" && (
@@ -180,7 +192,11 @@ export default function RequestShipsListPage() {
               <label>Создатель:</label>
               <select
                 value={userFilter}
-                onChange={(e) => setUserFilter(e.target.value)}
+                onChange={(e) => {
+                  setUserFilter(e.target.value);
+                  // Применяем фильтры сразу при изменении значения
+                  setTimeout(() => applyFilters(), 0);
+                }}
               >
                 <option value="">Все создатели</option>
                 {userOptions.map(id => (
@@ -189,7 +205,6 @@ export default function RequestShipsListPage() {
               </select>
             </div>
           )}
-          <button className="show_btn btn btn-active" onClick={applyFilters}>Показать</button>
         </div>
         
         {/* Отображение сообщения, если у пользователя нет заявок */}
